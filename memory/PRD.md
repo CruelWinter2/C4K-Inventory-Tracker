@@ -122,6 +122,10 @@ Full-stack Inventory Management System for **Computers 4 Kids (C4K)** nonprofit 
 - aria-live region announces filter/search result count to screen readers
 - Skip to main content link added to App.js
 
+### Edit Functionality Polish + First-Time Setup (2026-02)
+- **Edit mode made unmistakable** — Amber "EDITING: [serial_no]" badge in action bar, Serial No. locked (readOnly), button says "Update Record". PUT endpoint preserves created_at/created_by.
+- **First-time setup screen** — GET /api/setup/status (no auth), POST /api/setup/init (no auth, 403 if users exist). SetupPage at /setup with branded form, live password rules checklist (8 chars, uppercase, number, match). LoginPage auto-redirects to /setup when setup_required=true. Startup() no longer auto-creates default admin.
+
 ### Final Polish (2026-02)
 - **Pending Only filter** — 4th toggle button in Dashboard; maps to both "Pending Review" and "Pending Delivery" statuses. Stats bar and SR announcement update correctly.
 - **CSV export column fix** — Header row now uses `model` (not `modal`) while data correctly reads from `c.modal`. `manufacturer` column confirmed present.
