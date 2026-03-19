@@ -85,6 +85,11 @@ def doc_to_dict(doc: dict) -> dict:
     result['id'] = str(result.pop('_id'))
     return result
 
+async def get_admin_user(current_user=Depends(get_current_user)):
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
+
 
 # ── models ────────────────────────────────────────────────────────────────────
 
@@ -98,6 +103,14 @@ class ChangePasswordRequest(BaseModel):
 
 class StatusUpdate(BaseModel):
     status: str
+
+class CreateUserRequest(BaseModel):
+    username: str
+    initial_password: str
+    role: Optional[str] = "technician"
+
+class ResetUserPasswordRequest(BaseModel):
+    new_password: str
 
 class ComputerData(BaseModel):
     serial_no: str
@@ -173,6 +186,7 @@ async def login(data: LoginRequest):
         "token_type": "bearer",
         "must_change_password": user.get("must_change_password", False),
         "username": user["username"],
+        "role": user.get("role", "admin"),
     }
 
 @api_router.post("/auth/change-password")
@@ -257,6 +271,65 @@ async def delete_computer(serial_no: str, current_user=Depends(get_current_user)
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Computer not found")
     return {"message": "Deleted successfully"}
+
+
+# ── admin user management ─────────────────────────────────────────────────────
+
+def user_to_dict(user: dict) -> dict:
+    return {
+        "id": str(user["_id"]),
+        "username": user["username"],
+        "role": user.get("role", "technician"),
+        "must_change_password": user.get("must_change_password", False),
+        "created_at": user.get("created_at", ""),
+    }
+
+@api_router.get("/admin/users")
+async def list_users(admin=Depends(get_admin_user)):
+    users = await db.users.find({}).sort("created_at", 1).to_list(500)
+    return [user_to_dict(u) for u in users]
+
+@api_router.post("/admin/users", status_code=201)
+async def create_user(data: CreateUserRequest, admin=Depends(get_admin_user)):
+    if len(data.username.strip()) < 3:
+        raise HTTPException(status_code=400, detail="Username must be at least 3 characters")
+    if len(data.initial_password) < 8:
+        raise HTTPException(status_code=400, detail="Initial password must be at least 8 characters")
+    existing = await db.users.find_one({"username": data.username.strip().lower()})
+    if existing:
+        raise HTTPException(status_code=409, detail=f"Username '{data.username}' already exists")
+    now = datetime.now(timezone.utc).isoformat()
+    doc = {
+        "username": data.username.strip().lower(),
+        "hashed_password": hash_password(data.initial_password),
+        "role": data.role if data.role in ["admin", "technician"] else "technician",
+        "must_change_password": True,
+        "created_at": now,
+    }
+    result = await db.users.insert_one(doc)
+    created = await db.users.find_one({"_id": result.inserted_id})
+    return user_to_dict(created)
+
+@api_router.put("/admin/users/{username}/reset-password")
+async def reset_user_password(username: str, data: ResetUserPasswordRequest, admin=Depends(get_admin_user)):
+    if len(data.new_password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    result = await db.users.update_one(
+        {"username": username},
+        {"$set": {"hashed_password": hash_password(data.new_password), "must_change_password": True}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": f"Password reset for '{username}'. User must change on next login."}
+
+@api_router.delete("/admin/users/{username}")
+async def delete_user(username: str, admin=Depends(get_admin_user)):
+    if username == admin["username"]:
+        raise HTTPException(status_code=400, detail="You cannot delete your own account")
+    result = await db.users.delete_one({"username": username})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": f"User '{username}' deleted successfully"}
 
 
 # ── qr code ───────────────────────────────────────────────────────────────────

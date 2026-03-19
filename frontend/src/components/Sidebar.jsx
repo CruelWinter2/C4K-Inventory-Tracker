@@ -1,12 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, Download, LogOut, Star } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Download, LogOut, Star, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
-
-const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/add', label: 'Add New Computer', icon: PlusCircle, end: false },
-];
 
 export default function Sidebar({ onExport }) {
   const { user, logout } = useAuth();
@@ -17,6 +12,12 @@ export default function Sidebar({ onExport }) {
     toast.info('You have been logged out');
     navigate('/login', { replace: true });
   };
+
+  const NAV_ITEMS = [
+    { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+    { to: '/add', label: 'Add New Computer', icon: PlusCircle, end: false },
+    ...(user?.role === 'admin' ? [{ to: '/users', label: 'User Management', icon: Users, end: false }] : []),
+  ];
 
   return (
     <aside
@@ -67,7 +68,7 @@ export default function Sidebar({ onExport }) {
               onClick={onExport}
               data-testid="nav-export-data"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-150 w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]"
-              aria-label="Export all inventory data to CSV file"
+              aria-label="Export all inventory data to a CSV file"
             >
               <Download className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
               <span>Export Data</span>
@@ -81,13 +82,16 @@ export default function Sidebar({ onExport }) {
         {user && (
           <p className="text-white/60 text-xs mb-3 px-2 font-medium truncate">
             Signed in as <span className="text-white font-semibold">{user.username}</span>
+            {user.role === 'admin' && (
+              <span className="ml-1.5 text-[#FFD700] text-[10px] font-bold uppercase tracking-wide">(Admin)</span>
+            )}
           </p>
         )}
         <button
           onClick={handleLogout}
           data-testid="logout-button"
           className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-red-500/20 hover:text-red-200 transition-colors duration-150 w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]"
-          aria-label="Log out of the system"
+          aria-label="Log out of the C4K Inventory System"
         >
           <LogOut className="w-5 h-5" aria-hidden="true" />
           <span>Logout</span>

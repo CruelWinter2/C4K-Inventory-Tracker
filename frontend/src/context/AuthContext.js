@@ -39,9 +39,9 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (username, password) => {
     const res = await axios.post(`${API}/auth/login`, { username, password });
-    const { access_token, must_change_password, username: uname } = res.data;
+    const { access_token, must_change_password, username: uname, role } = res.data;
     localStorage.setItem('c4k_token', access_token);
-    setUser({ username: uname, must_change_password });
+    setUser({ username: uname, must_change_password, role });
     setMustChangePassword(must_change_password);
     return { must_change_password };
   }, []);
