@@ -244,6 +244,9 @@ async def update_computer(serial_no: str, data: ComputerData, current_user=Depen
     existing = await db.computers.find_one({"serial_no": serial_no})
     if not existing:
         raise HTTPException(status_code=404, detail="Computer not found")
+    restricted = ["Donated", "Sold"]
+    if current_user.get("role") != "admin" and data.inventory_status in restricted:
+        raise HTTPException(status_code=403, detail="Only admins can set status to Donated or Sold")
     update_doc = data.model_dump()
     update_doc["updated_at"] = datetime.now(timezone.utc).isoformat()
     update_doc["updated_by"] = current_user["username"]
@@ -258,6 +261,9 @@ async def update_status(serial_no: str, data: StatusUpdate, current_user=Depends
     valid = ["Processing", "In Stock", "Donated", "Sold", "Pending Review", "Pending Delivery"]
     if data.status not in valid:
         raise HTTPException(status_code=400, detail="Invalid status")
+    restricted = ["Donated", "Sold"]
+    if current_user.get("role") != "admin" and data.status in restricted:
+        raise HTTPException(status_code=403, detail="Only admins can set status to Donated or Sold")
     result = await db.computers.update_one(
         {"serial_no": serial_no},
         {"$set": {"inventory_status": data.status, "updated_at": datetime.now(timezone.utc).isoformat()}}

@@ -80,6 +80,16 @@ function ConfirmDeleteDialog({ computer, onConfirm, onCancel }) {
   );
 }
 
+/** Parses "MM/DD/YYYY" date string to a Date object, or null if invalid. */
+function parseDateStr(str) {
+  if (!str || !str.trim()) return null;
+  const parts = str.trim().split('/');
+  if (parts.length !== 3) return null;
+  const [m, d, y] = parts;
+  const dt = new Date(`${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
 /** Returns array of page numbers with 'ellipsis-N' strings for gaps. */
 function getPageRange(current, total) {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -104,6 +114,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [exporting, setExporting] = useState(false);
@@ -123,15 +135,20 @@ export default function DashboardPage() {
 
   useEffect(() => { fetchComputers(); }, [fetchComputers]);
 
-  // Reset to page 1 whenever search or filter changes
-  useEffect(() => { setCurrentPage(1); }, [search, statusFilter]);
+  // Reset to page 1 whenever search, filter, or dates change
+  useEffect(() => { setCurrentPage(1); }, [search, statusFilter, startDate, endDate]);
 
-  // Apply search + status filter
+  // Apply search + status filter + date range
   const filtered = computers.filter(c => {
     const q = search.toLowerCase();
     const matchesSearch = !q || c.serial_no?.toLowerCase().includes(q) || c.recipient_name?.toLowerCase().includes(q);
     const matchesFilter = statusFilter === 'All' || c.inventory_status === statusFilter;
-    return matchesSearch && matchesFilter;
+    const recordDate = parseDateStr(c.date_imaged);
+    const start = parseDateStr(startDate);
+    const end = parseDateStr(endDate);
+    const matchesStart = !start || !recordDate || recordDate >= start;
+    const matchesEnd = !end || !recordDate || recordDate <= end;
+    return matchesSearch && matchesFilter && matchesStart && matchesEnd;
   });
 
   // Paginate
@@ -180,10 +197,10 @@ export default function DashboardPage() {
   };
 
   const stats = {
-    total: computers.length,
-    processing: computers.filter(c => c.inventory_status === 'Processing').length,
-    inStock: computers.filter(c => c.inventory_status === 'In Stock').length,
-    donated: computers.filter(c => c.inventory_status === 'Donated').length,
+    total: filtered.length,
+    inStock: filtered.filter(c => c.inventory_status === 'In Stock').length,
+    pending: filtered.filter(c => c.inventory_status === 'Pending Review' || c.inventory_status === 'Pending Delivery').length,
+    donatedSold: filtered.filter(c => c.inventory_status === 'Donated' || c.inventory_status === 'Sold').length,
   };
 
   return (
@@ -229,17 +246,23 @@ export default function DashboardPage() {
         </header>
 
         <div className="flex-1 px-8 py-6">
-          {/* Stats */}
-          <section aria-label="Inventory statistics" className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {/* Quick Stats Bar */}
+          <section
+            aria-label="Inventory quick stats"
+            aria-live="polite"
+            aria-atomic="true"
+            data-testid="stats-bar"
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
+          >
             {[
-              { label: 'Total Records', value: stats.total, color: '#2e5496' },
-              { label: 'Processing',    value: stats.processing, color: '#2e5496' },
-              { label: 'In Stock',      value: stats.inStock, color: '#15803d' },
-              { label: 'Donated',       value: stats.donated, color: '#7e22ce' },
-            ].map(({ label, value, color }) => (
+              { label: 'Total Shown',    value: stats.total,      color: '#2e5496', testid: 'stat-total' },
+              { label: 'In Stock',       value: stats.inStock,    color: '#15803d', testid: 'stat-in-stock' },
+              { label: 'Pending',        value: stats.pending,    color: '#b45309', testid: 'stat-pending' },
+              { label: 'Donated / Sold', value: stats.donatedSold,color: '#7e22ce', testid: 'stat-donated-sold' },
+            ].map(({ label, value, color, testid }) => (
               <div key={label} className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">{label}</p>
-                <p className="text-3xl font-bold mt-1" style={{ color }}>{value}</p>
+                <p className="text-3xl font-bold mt-1" style={{ color }} data-testid={testid}>{value}</p>
               </div>
             ))}
           </section>
@@ -291,7 +314,49 @@ export default function DashboardPage() {
           <div aria-live="polite" aria-atomic="true" className="sr-only">
             {statusFilter !== 'All' ? `Showing ${statusFilter} computers only. ` : ''}
             {search ? `Searching for "${search}". ` : ''}
+            {(startDate || endDate) ? `Date range: ${startDate || 'any'} to ${endDate || 'any'}. ` : ''}
             {filtered.length} {filtered.length === 1 ? 'record' : 'records'} found.
+          </div>
+
+          {/* Date Range filter row */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-5 items-start sm:items-center">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap flex-shrink-0">
+              Date Imaged:
+            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <label htmlFor="date-start" className="text-xs text-gray-600 font-medium whitespace-nowrap">From:</label>
+              <input
+                type="text"
+                id="date-start"
+                value={startDate}
+                onChange={e => setStartDate(e.target.value)}
+                placeholder="MM/DD/YYYY"
+                aria-label="Start date for Date Imaged filter, type in MM/DD/YYYY format"
+                className="border-2 border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2e5496] focus:ring-2 focus:ring-[#2e5496]/20 bg-white w-32"
+                data-testid="date-start-input"
+              />
+              <label htmlFor="date-end" className="text-xs text-gray-600 font-medium whitespace-nowrap">To:</label>
+              <input
+                type="text"
+                id="date-end"
+                value={endDate}
+                onChange={e => setEndDate(e.target.value)}
+                placeholder="MM/DD/YYYY"
+                aria-label="End date for Date Imaged filter, type in MM/DD/YYYY format"
+                className="border-2 border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2e5496] focus:ring-2 focus:ring-[#2e5496]/20 bg-white w-32"
+                data-testid="date-end-input"
+              />
+              {(startDate || endDate) && (
+                <button
+                  onClick={() => { setStartDate(''); setEndDate(''); }}
+                  className="text-xs text-gray-500 hover:text-red-600 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2e5496] px-2 py-1 rounded"
+                  aria-label="Clear date range filter"
+                  data-testid="clear-date-filter"
+                >
+                  Clear dates
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Table */}
@@ -323,7 +388,7 @@ export default function DashboardPage() {
                           <div>
                             <p className="font-semibold text-gray-500 mb-1">No matching records found.</p>
                             <button
-                              onClick={() => { setSearch(''); setStatusFilter('All'); }}
+                              onClick={() => { setSearch(''); setStatusFilter('All'); setStartDate(''); setEndDate(''); }}
                               className="text-[#2e5496] text-sm font-semibold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2e5496]"
                               aria-label="Clear all filters and search"
                             >
@@ -368,7 +433,11 @@ export default function DashboardPage() {
                               className="text-xs border border-gray-300 rounded px-1.5 py-1 bg-white focus:outline-none focus:border-[#2e5496] focus:ring-1 focus:ring-[#2e5496]"
                               data-testid={`status-select-${computer.serial_no}`}
                             >
-                              {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                              {STATUSES.map(s => (
+                                <option key={s} value={s} disabled={!isAdmin && (s === 'Donated' || s === 'Sold')}>
+                                  {s}{!isAdmin && (s === 'Donated' || s === 'Sold') ? ' (admin only)' : ''}
+                                </option>
+                              ))}
                             </select>
                           </div>
                         </td>

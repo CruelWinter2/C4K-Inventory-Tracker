@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import QRCode from 'react-qr-code';
 import { Printer, ArrowLeft } from 'lucide-react';
 import '../styles/form.css';
 
@@ -22,6 +21,7 @@ export default function PrintViewPage() {
   const navigate = useNavigate();
   const [computer, setComputer] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [printHint, setPrintHint] = useState(false);
   const backRef = useRef(null);
 
   useEffect(() => {
@@ -31,7 +31,10 @@ export default function PrintViewPage() {
       .finally(() => setLoading(false));
   }, [decodedSerial]);
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    setPrintHint(true);
+    window.print();
+  };
 
   if (loading) {
     return (
@@ -86,6 +89,16 @@ export default function PrintViewPage() {
             Print
           </button>
         </div>
+        {printHint && (
+          <p
+            className="no-print"
+            role="alert"
+            aria-live="polite"
+            style={{ margin: '4px 20px 0', fontSize: 11, color: '#555' }}
+          >
+            If the print dialog did not open, press Ctrl+P (Windows) or Cmd+P (Mac).
+          </p>
+        )}
 
         <div className="page-wrapper">
           {/* ── Page 1 Header ── */}
@@ -95,7 +108,7 @@ export default function PrintViewPage() {
               <p>2455 W Capitol Ave, West Sacramento, CA, 95691 <br /> (916) 572-1152 | Mon-Fri 10am-6pm</p>
             </div>
             <div className="ph-logo">
-              <img src="https://customer-assets.emergentagent.com/job_2e3f3b26-4f5e-48ea-ae24-526770987c3d/artifacts/uej1rt1j_logo.png" alt="Computers 4 Kids logo" />
+              <img src="https://customer-assets.emergentagent.com/job_a73babea-9e6d-474e-b216-bf87e9a53159/artifacts/d22ptam1_logo.png" alt="Computers 4 Kids logo" />
             </div>
           </header>
 
@@ -207,19 +220,6 @@ export default function PrintViewPage() {
                 </tbody>
               </table>
             </section>
-
-            {/* QR Code */}
-            {c.serial_no && (
-              <div className="qr-container" style={{ width: 'fit-content', margin: '0 auto 20px', border: '1px solid #919191', padding: 10 }}>
-                <p style={{ textAlign: 'center', fontSize: 11, marginBottom: 6, fontWeight: 600 }}>Serial No. QR Code</p>
-                <QRCode
-                  value={c.serial_no}
-                  size={100}
-                  aria-label={`QR code for serial number ${c.serial_no}`}
-                />
-                <p style={{ textAlign: 'center', fontSize: 9, marginTop: 5, wordBreak: 'break-all', maxWidth: 110 }}>{c.serial_no}</p>
-              </div>
-            )}
 
             {/* ── Computer Information ── */}
             <section aria-labelledby="print-computer-info-heading" className="computer-info">
@@ -339,7 +339,7 @@ export default function PrintViewPage() {
           {/* ── Page 2: Orientation Guidelines ── */}
           <header className="page-header ph-secondary">
             <div className="ph-logo">
-              <img src="https://customer-assets.emergentagent.com/job_2e3f3b26-4f5e-48ea-ae24-526770987c3d/artifacts/uej1rt1j_logo.png" alt="Computers 4 Kids logo" />
+              <img src="https://customer-assets.emergentagent.com/job_a73babea-9e6d-474e-b216-bf87e9a53159/artifacts/d22ptam1_logo.png" alt="Computers 4 Kids logo" />
             </div>
             <div className="ph-title">
               <h1>Orientation Instructional Guidelines</h1>
@@ -383,9 +383,6 @@ export default function PrintViewPage() {
                 [c.oig_3_1, 'Click the Start Button> Power button and describe the difference between restart and shutdown.'],
                 [c.oig_3_2, 'Describe how restart can help correct some computer problems like slow performance and Operating Systems and Application malfunctions.'],
                 [c.oig_3_3, 'Explain how to shut the system down in case of lock up: Press and hold the System Unit power button in until the system turns off.'],
-                [c.oig_3_5, "Open the CD-ROM of the computer and if there's a CD in it then take it out."],
-                [c.oig_3_6, 'Have them shut down the computer properly and guide them through the disassembly and help pack it up for transport.'],
-                [c.oig_3_7, 'Make sure they know that many of the components should be handled carefully to ensure the unit does not break during transport.'],
               ].map(([ checked, text ], i) => (
                 <div key={i} className="form-checkbox align-start">
                   <Checkbox checked={checked} label={`OIG shutdown item ${i + 1}`} />
@@ -399,6 +396,16 @@ export default function PrintViewPage() {
                   <ol><li>If yes: Confirm it works.</li><li>Show them: How they can connect to their access point.</li></ol>
                 </span>
               </div>
+              {[
+                [c.oig_3_5, "Open the CD-ROM of the computer and if there's a CD in it then take it out."],
+                [c.oig_3_6, 'Have them shut down the computer properly and guide them through the disassembly and help pack it up for transport.'],
+                [c.oig_3_7, 'Make sure they know that many of the components should be handled carefully to ensure the unit does not break during transport.'],
+              ].map(([ checked, text ], i) => (
+                <div key={`oig3b-${i}`} className="form-checkbox align-start">
+                  <Checkbox checked={checked} label={`OIG shutdown item ${i + 5}`} />
+                  <span>{text}</span>
+                </div>
+              ))}
             </div>
 
             {/* Audit note on print */}

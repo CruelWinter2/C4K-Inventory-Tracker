@@ -1,0 +1,67 @@
+{
+  "summary": "Tested all 6 new feature sets from iteration 4: QR removal, logo update, OIG order fix, technician status restrictions (backend + UI), date-range filter, quick stats bar, and print hint. 17/17 backend tests pass. All frontend features working EXCEPT one date filter logic bug.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "DashboardPage - Date Range Filter",
+        "issue": "Records with no date_imaged are NOT excluded when a date range is active. Bug in filter logic: `!start || !recordDate || recordDate >= start` - the `!recordDate` condition causes null-date records to always pass through. Requirement says they should be EXCLUDED when a date range is active.",
+        "file": "/app/frontend/src/pages/DashboardPage.jsx",
+        "lines": "149-150",
+        "current_code": "const matchesStart = !start || !recordDate || recordDate >= start;\nconst matchesEnd   = !end   || !recordDate || recordDate <= end;",
+        "fix_required": "const matchesStart = !start || (recordDate !== null && recordDate >= start);\nconst matchesEnd   = !end   || (recordDate !== null && recordDate <= end);",
+        "priority": "MEDIUM",
+        "confirmed_by_test": "Record UI-FORM-SAVE-001 (no date_imaged) still shows when date range 01/01/2025-01/31/2025 is set"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "features_verified": {
+    "qr_code_removed": "✅ No QR code in PrintViewPage - no import, no element in DOM",
+    "logo_url_updated": "✅ Both IntakeFormPage and PrintViewPage use new URL: job_a73babea-9e6d-474e-b216-bf87e9a53159",
+    "oig_order_fixed": "✅ oig_3_4 (wireless internet) correctly positioned BETWEEN oig_3_3 (lock up) and oig_3_5 (CD-ROM) in both pages",
+    "tech_ui_restriction_dashboard": "✅ Dashboard status dropdown shows 'Donated (admin only)' and 'Sold (admin only)' as disabled options for technician",
+    "tech_ui_restriction_intake_form": "✅ IntakeForm status select shows 'Donated (admin only)' and 'Sold (admin only)' as disabled options for technician",
+    "backend_403_restriction": "✅ PATCH /api/computers/{serial_no}/status returns 403 for Donated/Sold when technician. Allows Processing/In Stock/Pending Review/Pending Delivery",
+    "backend_403_put_restriction": "✅ PUT /api/computers/{serial_no} returns 403 when technician tries to set Donated or Sold status",
+    "admin_can_set_donated_sold": "✅ Admin can set Donated and Sold via PATCH and PUT",
+    "date_start_input_type": "✅ date-start-input is type=text (not date picker)",
+    "date_end_input_type": "✅ date-end-input is type=text (not date picker)",
+    "clear_dates_button": "✅ 'Clear dates' button (data-testid=clear-date-filter) appears when dates entered, disappears after clearing",
+    "stats_bar_attributes": "✅ stats-bar has aria-live='polite' and aria-atomic='true'",
+    "stat_testids": "✅ All 4 stat cards found: stat-total, stat-in-stock, stat-pending, stat-donated-sold",
+    "stats_reflect_filtered": "✅ Stats update when search filter applied",
+    "print_hint_absent_before_click": "✅ No print hint visible before clicking print button",
+    "print_hint_shown_after_click": "✅ Print hint 'If the print dialog did not open, press Ctrl+P (Windows) or Cmd+P (Mac).' shown after clicking Print button",
+    "window_print_called": "✅ window.print() is triggered when Print button clicked",
+    "date_filter_with_dates_present": "✅ Records with date_imaged within range are shown",
+    "date_filter_excludes_null_dates": "❌ BUG: Records with no date_imaged are NOT excluded when date range is active"
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iter4_new_features.py",
+    "/app/test_reports/pytest/pytest_iter4.xml"
+  ],
+  "action_items": [
+    "Fix date filter logic in DashboardPage.jsx lines 149-150: Change `const matchesStart = !start || !recordDate || recordDate >= start;` to `const matchesStart = !start || (recordDate !== null && recordDate >= start);` and same fix for matchesEnd. This ensures records with no date_imaged are excluded when a date range is active."
+  ],
+  "critical_code_review_comments": [
+    "DashboardPage.jsx lines 149-150: Date filter includes records with null date_imaged when date range is active. Fix: remove the `!recordDate` short-circuit condition."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter4_new_features.py"
+  ],
+  "success_rate": {
+    "backend": "100% (17/17 tests pass)",
+    "frontend": "94% (1 bug: date filter logic for null date_imaged records)"
+  },
+  "test_credentials": "Admin: admin/Admin@12345. Tech user uitesttech was created and deleted during testing.",
+  "seed_data_creation": "Created/used ITER4-TEST-STATUS-001 for backend tests (cleaned up). Used existing UI-FORM-SAVE-001 for UI tests.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All iteration 4 features verified except date filter logic bug. Frontend: QR removed ✅, logo updated ✅, OIG order fixed ✅, technician Donated/Sold restrictions UI ✅, print hint ✅, stats bar ✅, date inputs type=text ✅, clear dates button ✅. One bug: records with no date_imaged still show when date range is active. Admin creds: admin/Admin@12345.",
+  "rca_of_issue": "Date filter bug RCA: In DashboardPage.jsx lines 149-150, the filter condition `!start || !recordDate || recordDate >= start` has a short-circuit: when recordDate is null (record has no date_imaged), `!recordDate` evaluates to true, making the entire expression true regardless of whether a date range is active. Fix: Replace with `!start || (recordDate !== null && recordDate >= start)` to properly exclude null-date records when a start/end date filter is set."
+}

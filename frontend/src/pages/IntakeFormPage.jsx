@@ -4,6 +4,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Save, ArrowLeft, Calendar } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
+import { useAuth } from '../context/AuthContext';
 import '../styles/form.css';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -41,6 +42,8 @@ export default function IntakeFormPage() {
   const isEdit = Boolean(serialNo);
   const decodedSerial = isEdit ? decodeURIComponent(serialNo) : null;
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [audit, setAudit] = useState({ created_at: null, updated_at: null, created_by: null, updated_by: null });
@@ -161,7 +164,11 @@ export default function IntakeFormPage() {
                   aria-label="Computer inventory status"
                   data-testid="form-status-select"
                 >
-                  {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                  {STATUSES.map(s => (
+                    <option key={s} value={s} disabled={!isAdmin && (s === 'Donated' || s === 'Sold')}>
+                      {s}{!isAdmin && (s === 'Donated' || s === 'Sold') ? ' (admin only)' : ''}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -185,7 +192,7 @@ export default function IntakeFormPage() {
                   <p>2455 W Capitol Ave, West Sacramento, CA, 95691 <br /> (916) 572-1152 | Mon-Fri 10am-6pm</p>
                 </div>
                 <div className="ph-logo" aria-hidden="true">
-                  <img src="https://customer-assets.emergentagent.com/job_2e3f3b26-4f5e-48ea-ae24-526770987c3d/artifacts/uej1rt1j_logo.png" alt="Computers 4 Kids logo" />
+                  <img src="https://customer-assets.emergentagent.com/job_a73babea-9e6d-474e-b216-bf87e9a53159/artifacts/d22ptam1_logo.png" alt="Computers 4 Kids logo" />
                 </div>
               </header>
 
@@ -520,7 +527,7 @@ export default function IntakeFormPage() {
               {/* ── Page 2 Header (Orientation Guidelines) ── */}
               <header className="page-header ph-secondary">
                 <div className="ph-logo" aria-hidden="true">
-                  <img src="https://customer-assets.emergentagent.com/job_2e3f3b26-4f5e-48ea-ae24-526770987c3d/artifacts/uej1rt1j_logo.png" alt="Computers 4 Kids logo" />
+                  <img src="https://customer-assets.emergentagent.com/job_a73babea-9e6d-474e-b216-bf87e9a53159/artifacts/d22ptam1_logo.png" alt="Computers 4 Kids logo" />
                 </div>
                 <div className="ph-title">
                   <h1>Orientation Instructional Guidelines</h1>
@@ -573,9 +580,6 @@ export default function IntakeFormPage() {
                     ['oig_3_1', 'Click the Start Button> Power button and describe the difference between restart and shutdown.'],
                     ['oig_3_2', 'Describe how restart can help correct some computer problems like slow performance and Operating Systems and Application malfunctions.'],
                     ['oig_3_3', 'Explain how to shut the system down in case of lock up: Press and hold the System Unit power button in until the system turns off.'],
-                    ['oig_3_5', 'Open the CD-ROM of the computer and if there\'s a CD in it then take it out.'],
-                    ['oig_3_6', 'Have them shut down the computer properly and guide them through the disassembly and help pack it up for transport.'],
-                    ['oig_3_7', 'Make sure they know that many of the components should be handled carefully to ensure the unit does not break during transport.'],
                   ].map(([field, labelText]) => (
                     <div key={field} className="form-checkbox align-start">
                       <input type="checkbox" name="oig-3" id={field} checked={formData[field]} onChange={handleChange} />
@@ -592,6 +596,16 @@ export default function IntakeFormPage() {
                       </ol>
                     </label>
                   </div>
+                  {[
+                    ['oig_3_5', 'Open the CD-ROM of the computer and if there\'s a CD in it then take it out.'],
+                    ['oig_3_6', 'Have them shut down the computer properly and guide them through the disassembly and help pack it up for transport.'],
+                    ['oig_3_7', 'Make sure they know that many of the components should be handled carefully to ensure the unit does not break during transport.'],
+                  ].map(([field, labelText]) => (
+                    <div key={field} className="form-checkbox align-start">
+                      <input type="checkbox" name="oig-3" id={field} checked={formData[field]} onChange={handleChange} />
+                      <label htmlFor={field}>{labelText}</label>
+                    </div>
+                  ))}
                 </div>
               </div>
 
