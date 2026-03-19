@@ -1,73 +1,38 @@
-from fastapi import FastAPI, APIRouter
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, APIRouter, HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer
+from fastapi.responses import StreamingResponse
 from motor.motor_asyncio import AsyncIOMotorClient
+from starlette.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime, timezone, timedelta
+from bson import ObjectId
+import bcrypt
+import jwt
+import io
+import csv
+import qrcode
+import base64
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
-import uuid
-from datetime import datetime, timezone
-
+from dotenv import load_dotenv
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
+SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'c4k-inventory-secret-2025-change-in-prod')
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_HOURS = 8
+
 mongo_url = os.environ['MONGO_URL']
+db_name = os.environ['DB_NAME']
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[db_name]
 
-# Create the main app without a prefix
-app = FastAPI()
-
-# Create a router with the /api prefix
+app = FastAPI(title="C4K Inventory API")
 api_router = APIRouter(prefix="/api")
-
-
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class StatusCheckCreate(BaseModel):
-    client_name: str
-
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
-
-# Include the router in the main app
-app.include_router(api_router)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 app.add_middleware(
     CORSMiddleware,
@@ -77,13 +42,295 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+# ── helpers ──────────────────────────────────────────────────────────────────
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def verify_password(password: str, hashed: str) -> bool:
+    try:
+        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+    except Exception:
+        return False
+
+def create_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
+    to_encode["exp"] = expire
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        user = await db.users.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        return user
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired. Please log in again.")
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+def doc_to_dict(doc: dict) -> dict:
+    if not doc:
+        return None
+    result = dict(doc)
+    result['id'] = str(result.pop('_id'))
+    return result
+
+
+# ── models ────────────────────────────────────────────────────────────────────
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class ChangePasswordRequest(BaseModel):
+    new_password: str
+    confirm_password: str
+
+class StatusUpdate(BaseModel):
+    status: str
+
+class ComputerData(BaseModel):
+    serial_no: str
+    recipient_name: Optional[str] = ""
+    parent_name: Optional[str] = ""
+    school: Optional[str] = ""
+    school_id: Optional[str] = ""
+    address: Optional[str] = ""
+    city: Optional[str] = ""
+    state: Optional[str] = ""
+    zip_code: Optional[str] = ""
+    phone: Optional[str] = ""
+    os_win10: Optional[bool] = False
+    os_win11: Optional[bool] = False
+    os_home: Optional[bool] = False
+    os_pro: Optional[bool] = False
+    os_activated: Optional[bool] = False
+    opendns_preferred: Optional[bool] = False
+    opendns_alternate: Optional[bool] = False
+    program_firefox: Optional[bool] = False
+    program_chrome: Optional[bool] = False
+    program_avira: Optional[bool] = False
+    program_libre_office: Optional[bool] = False
+    program_cd_burner_xp: Optional[bool] = False
+    program_java: Optional[bool] = False
+    program_vlc_player: Optional[bool] = False
+    desktop_computer: Optional[bool] = False
+    laptop_computer: Optional[bool] = False
+    manufacturer: Optional[str] = ""
+    cpu_cores: Optional[str] = ""
+    cpu_speed: Optional[str] = ""
+    cpu_name: Optional[str] = ""
+    touch_screen_yes: Optional[bool] = False
+    touch_screen_no: Optional[bool] = False
+    imaged_by: Optional[str] = ""
+    reviewed_by: Optional[str] = ""
+    delivered_by: Optional[str] = ""
+    modal: Optional[str] = ""
+    ram: Optional[str] = ""
+    storage_hdd: Optional[bool] = False
+    storage_ssd: Optional[bool] = False
+    storage_size: Optional[str] = ""
+    bios_version: Optional[str] = ""
+    special_features: Optional[str] = ""
+    date_imaged: Optional[str] = ""
+    date_reviewed: Optional[str] = ""
+    date_delivered: Optional[str] = ""
+    oig_1_1: Optional[bool] = False
+    oig_2_1: Optional[bool] = False
+    oig_2_2: Optional[bool] = False
+    oig_2_3: Optional[bool] = False
+    oig_2_4: Optional[bool] = False
+    oig_3_1: Optional[bool] = False
+    oig_3_2: Optional[bool] = False
+    oig_3_3: Optional[bool] = False
+    oig_3_4: Optional[bool] = False
+    oig_3_5: Optional[bool] = False
+    oig_3_6: Optional[bool] = False
+    oig_3_7: Optional[bool] = False
+    inventory_status: Optional[str] = "Processing"
+
+
+# ── auth routes ───────────────────────────────────────────────────────────────
+
+@api_router.post("/auth/login")
+async def login(data: LoginRequest):
+    user = await db.users.find_one({"username": data.username})
+    if not user or not verify_password(data.password, user["hashed_password"]):
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+    token = create_token({"sub": str(user["_id"]), "username": user["username"]})
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "must_change_password": user.get("must_change_password", False),
+        "username": user["username"],
+    }
+
+@api_router.post("/auth/change-password")
+async def change_password(data: ChangePasswordRequest, current_user=Depends(get_current_user)):
+    if data.new_password != data.confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match")
+    if len(data.new_password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long")
+    hashed = hash_password(data.new_password)
+    await db.users.update_one(
+        {"_id": current_user["_id"]},
+        {"$set": {"hashed_password": hashed, "must_change_password": False}}
+    )
+    return {"message": "Password changed successfully"}
+
+@api_router.get("/auth/me")
+async def get_me(current_user=Depends(get_current_user)):
+    return {
+        "username": current_user["username"],
+        "role": current_user.get("role", "admin"),
+        "must_change_password": current_user.get("must_change_password", False),
+    }
+
+
+# ── computer routes ───────────────────────────────────────────────────────────
+
+@api_router.get("/computers")
+async def list_computers(current_user=Depends(get_current_user)):
+    computers = await db.computers.find({}).sort("created_at", -1).to_list(1000)
+    return [doc_to_dict(c) for c in computers]
+
+@api_router.post("/computers", status_code=201)
+async def create_computer(data: ComputerData, current_user=Depends(get_current_user)):
+    existing = await db.computers.find_one({"serial_no": data.serial_no})
+    if existing:
+        raise HTTPException(status_code=409, detail=f"Serial No. '{data.serial_no}' already exists")
+    now = datetime.now(timezone.utc).isoformat()
+    doc = data.model_dump()
+    doc["created_at"] = now
+    doc["updated_at"] = now
+    doc["created_by"] = current_user["username"]
+    result = await db.computers.insert_one(doc)
+    created = await db.computers.find_one({"_id": result.inserted_id})
+    return doc_to_dict(created)
+
+@api_router.get("/computers/{serial_no}")
+async def get_computer(serial_no: str, current_user=Depends(get_current_user)):
+    doc = await db.computers.find_one({"serial_no": serial_no})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Computer not found")
+    return doc_to_dict(doc)
+
+@api_router.put("/computers/{serial_no}")
+async def update_computer(serial_no: str, data: ComputerData, current_user=Depends(get_current_user)):
+    existing = await db.computers.find_one({"serial_no": serial_no})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Computer not found")
+    update_doc = data.model_dump()
+    update_doc["updated_at"] = datetime.now(timezone.utc).isoformat()
+    update_doc["created_at"] = existing.get("created_at", update_doc["updated_at"])
+    update_doc["created_by"] = existing.get("created_by", current_user["username"])
+    await db.computers.update_one({"serial_no": serial_no}, {"$set": update_doc})
+    updated = await db.computers.find_one({"serial_no": serial_no})
+    return doc_to_dict(updated)
+
+@api_router.patch("/computers/{serial_no}/status")
+async def update_status(serial_no: str, data: StatusUpdate, current_user=Depends(get_current_user)):
+    valid = ["Processing", "In Stock", "Donated", "Sold", "Pending Review", "Pending Delivery"]
+    if data.status not in valid:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    result = await db.computers.update_one(
+        {"serial_no": serial_no},
+        {"$set": {"inventory_status": data.status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Computer not found")
+    return {"message": "Status updated", "status": data.status}
+
+@api_router.delete("/computers/{serial_no}")
+async def delete_computer(serial_no: str, current_user=Depends(get_current_user)):
+    result = await db.computers.delete_one({"serial_no": serial_no})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Computer not found")
+    return {"message": "Deleted successfully"}
+
+
+# ── qr code ───────────────────────────────────────────────────────────────────
+
+@api_router.get("/computers/{serial_no}/qr")
+async def generate_qr(serial_no: str, current_user=Depends(get_current_user)):
+    qr = qrcode.QRCode(version=1, box_size=8, border=4)
+    qr.add_data(serial_no)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    buf.seek(0)
+    img_b64 = base64.b64encode(buf.read()).decode('utf-8')
+    return {"qr_code": f"data:image/png;base64,{img_b64}", "serial_no": serial_no}
+
+
+# ── csv export ────────────────────────────────────────────────────────────────
+
+@api_router.get("/export/csv")
+async def export_csv(current_user=Depends(get_current_user)):
+    computers = await db.computers.find({}).sort("created_at", -1).to_list(1000)
+    output = io.StringIO()
+    fieldnames = [
+        "serial_no", "inventory_status", "recipient_name", "parent_name",
+        "school", "school_id", "address", "city", "state", "zip_code", "phone",
+        "os_win10", "os_win11", "os_home", "os_pro", "os_activated",
+        "opendns_preferred", "opendns_alternate",
+        "program_firefox", "program_chrome", "program_avira", "program_libre_office",
+        "program_cd_burner_xp", "program_java", "program_vlc_player",
+        "desktop_computer", "laptop_computer", "manufacturer", "modal",
+        "cpu_name", "cpu_cores", "cpu_speed", "ram", "storage_size",
+        "storage_hdd", "storage_ssd", "bios_version", "special_features",
+        "touch_screen_yes", "touch_screen_no",
+        "imaged_by", "date_imaged", "reviewed_by", "date_reviewed",
+        "delivered_by", "date_delivered",
+        "oig_1_1", "oig_2_1", "oig_2_2", "oig_2_3", "oig_2_4",
+        "oig_3_1", "oig_3_2", "oig_3_3", "oig_3_4", "oig_3_5", "oig_3_6", "oig_3_7",
+        "created_at", "updated_at", "created_by",
+    ]
+    writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+    writer.writeheader()
+    for comp in computers:
+        row = {k: comp.get(k, '') for k in fieldnames}
+        writer.writerow(row)
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=c4k_inventory.csv"},
+    )
+
+
+# ── startup ───────────────────────────────────────────────────────────────────
+
+app.include_router(api_router)
+
+
+@app.on_event("startup")
+async def startup():
+    existing = await db.users.find_one({"username": "admin"})
+    if not existing:
+        await db.users.insert_one({
+            "username": "admin",
+            "hashed_password": hash_password("admin"),
+            "role": "admin",
+            "must_change_password": True,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+        logger.info("Default admin user created (must change password on first login)")
+    await db.computers.create_index("serial_no", unique=True)
+    await db.users.create_index("username", unique=True)
+
+
 @app.on_event("shutdown")
-async def shutdown_db_client():
+async def shutdown():
     client.close()

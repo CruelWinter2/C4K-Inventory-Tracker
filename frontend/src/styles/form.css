@@ -1,0 +1,493 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Computers 4 Kids — Original Form Styles (faithfully reproduced)
+   Used by IntakeFormPage and PrintViewPage
+───────────────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+.c4k-form-root * {
+  box-sizing: border-box;
+}
+
+.c4k-form-root {
+  font-size: 14px;
+  line-height: 1.3;
+  font-family: "Montserrat", sans-serif;
+}
+
+.c4k-form-root img {
+  max-width: 100%;
+  display: block;
+}
+
+.c4k-form-root h1,
+.c4k-form-root h2,
+.c4k-form-root h3,
+.c4k-form-root h4,
+.c4k-form-root h5,
+.c4k-form-root h6,
+.c4k-form-root p,
+.c4k-form-root span,
+.c4k-form-root ul,
+.c4k-form-root ol,
+.c4k-form-root li,
+.c4k-form-root a,
+.c4k-form-root fieldset {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.c4k-form-root ol {
+  counter-reset: item;
+  padding-left: 25px;
+}
+
+.c4k-form-root li {
+  counter-increment: item;
+  padding-left: 3px;
+}
+
+.c4k-form-root li::marker {
+  content: counters(item, ".", lower-alpha) ") ";
+}
+
+.c4k-form-root h1 {
+  font-size: 26px;
+}
+
+.c4k-form-root .h2 {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 2px 15px;
+  margin-bottom: 10px;
+}
+
+.c4k-form-root input {
+  padding: 6px 10px;
+  outline: none;
+  border: 1px solid #919191;
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+}
+
+.c4k-form-root input[type="text"] {
+  width: 100%;
+  flex: 1;
+}
+
+.c4k-form-root input:focus {
+  background-color: #fff;
+  border-color: #000;
+  outline: 2px solid #2e5496;
+  outline-offset: 1px;
+}
+
+.c4k-form-root strong {
+  font-weight: 600;
+}
+
+.c4k-form-root .action-buttons {
+  display: flex;
+  gap: 10px;
+  padding: 15px 20px;
+  background: #fff;
+  border-bottom: 2px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  align-items: center;
+}
+
+.c4k-form-root .button {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background-color: transparent;
+  font-size: 16px;
+  color: #000000;
+  padding: 8px 14px;
+  border-radius: 4px;
+  font-family: "Montserrat", sans-serif;
+}
+
+.c4k-form-root .button:hover {
+  color: #2e5496;
+  background-color: #f0f4ff;
+}
+
+.c4k-form-root .button:focus-visible {
+  outline: 2px solid #2e5496;
+  outline-offset: 2px;
+}
+
+.c4k-form-root .button-primary {
+  background-color: #2e5496;
+  color: #fff;
+  font-weight: 600;
+}
+
+.c4k-form-root .button-primary:hover {
+  background-color: #1e3a6e;
+  color: #fff;
+}
+
+.c4k-form-root .w-200 {
+  width: 200px;
+  min-width: 200px;
+}
+
+.c4k-form-root .w-80 {
+  width: 80px;
+  min-width: 80px;
+}
+
+.c4k-form-root .flex-1 {
+  flex: 1;
+}
+
+.c4k-form-root .bg-filled {
+  background-color: #f4f7ff;
+}
+
+.c4k-form-root .border-0 {
+  border: none !important;
+}
+
+.c4k-form-root .p-0 {
+  padding: 0 !important;
+}
+
+.c4k-form-root .flex-wrap {
+  flex-wrap: wrap;
+}
+
+.c4k-form-root .bg-primary {
+  background-color: #2e5496;
+  color: #fff;
+}
+
+.c4k-form-root .bordered {
+  border: 1px solid #919191;
+}
+
+.c4k-form-root .form-group.bordered {
+  padding: 5.5px 10px;
+  margin-top: 1px;
+  margin-bottom: 1px;
+  flex: 1;
+}
+
+.c4k-form-root .text-center {
+  text-align: center;
+}
+
+.c4k-form-root .align-center {
+  align-items: center;
+}
+
+.c4k-form-root .justify-center {
+  justify-content: center;
+}
+
+.c4k-form-root .form-checkbox.align-start {
+  align-items: start;
+}
+
+.c4k-form-root .form-checkbox.align-start input {
+  margin-top: 2px;
+}
+
+.c4k-form-root .cg-5 {
+  column-gap: 5px !important;
+}
+
+.c4k-form-root .bg-yellow {
+  background-color: #ffff00;
+}
+
+.c4k-form-root .note {
+  text-align: center;
+  margin: 10px 0;
+  padding: 2px 15px;
+}
+
+.c4k-form-root .my-20 {
+  margin-top: 20px !important;
+  margin-bottom: 20px !important;
+}
+
+.c4k-form-root .mt-0 {
+  margin-top: 0 !important;
+}
+
+.c4k-form-root .page-wrapper {
+  max-width: 1024px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.c4k-form-root .page-header {
+  background-color: #2e5496;
+  display: flex;
+  align-items: center;
+  padding: 15px 50px;
+  min-height: 140px;
+}
+
+.c4k-form-root .ph-title {
+  color: #fff;
+  padding: 0 50px;
+  text-align: center;
+  flex: 1;
+}
+
+.c4k-form-root .ph-title p {
+  font-size: 16px;
+}
+
+.c4k-form-root .ph-secondary h1 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.c4k-form-root .ph-secondary p {
+  font-size: 12px;
+}
+
+.c4k-form-root .ph-logo {
+  width: 105px;
+}
+
+.c4k-form-root .form-group,
+.c4k-form-root .form-field,
+.c4k-form-root .form-checkbox {
+  display: flex;
+  row-gap: 3px;
+  column-gap: 10px;
+}
+
+.c4k-form-root .form-field {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+.c4k-form-root .form-field label {
+  padding-top: 6px;
+}
+
+.c4k-form-root .form-checkbox {
+  column-gap: 5px;
+  align-items: center;
+}
+
+.c4k-form-root .page-body {
+  padding: 15px 50px;
+}
+
+.c4k-form-root table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.c4k-form-root table td {
+  border: 1px solid #919191;
+  padding: 6px 10px;
+}
+
+.c4k-form-root .softwares-info {
+  margin-bottom: 30px;
+}
+
+.c4k-form-root .softwares-info table td:first-child {
+  width: 155px;
+}
+
+.c4k-form-root .programs {
+  column-gap: 30px;
+}
+
+.c4k-form-root .computer-info {
+  margin-bottom: 70px;
+}
+
+.c4k-form-root .computer-info .h2 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.c4k-form-root .computer-info .computer-info-body {
+  display: flex;
+  gap: 2px;
+}
+
+.c4k-form-root .computer-info .col {
+  width: 50%;
+}
+
+.c4k-form-root .computer-info fieldset + fieldset {
+  margin-top: 40px;
+}
+
+.c4k-form-root .computer-info fieldset .form-field label:first-child,
+.c4k-form-root .computer-info fieldset .form-group label:first-child {
+  min-width: 110px;
+  padding-left: 10px;
+}
+
+.c4k-form-root .computer-info .col:last-child fieldset .form-field label:first-child,
+.c4k-form-root .computer-info .col:last-child fieldset .form-group label:first-child {
+  min-width: 130px;
+}
+
+.c4k-form-root .oig + .oig {
+  margin-top: 20px;
+}
+
+.c4k-form-root .oig > .form-checkbox {
+  margin-bottom: 10px;
+}
+
+.c4k-form-root .oig p,
+.c4k-form-root .oig li {
+  margin-bottom: 3px;
+}
+
+.c4k-form-root .signatures {
+  display: flex;
+  column-gap: 50px;
+  row-gap: 10px;
+  margin-top: 30px;
+}
+
+.c4k-form-root .signatures .col {
+  width: 50%;
+}
+
+.c4k-form-root .signatures .form-field {
+  display: block;
+}
+
+.c4k-form-root .signatures .form-field label {
+  display: block;
+}
+
+.c4k-form-root .page-bottom-note {
+  text-align: center;
+  font-style: italic;
+  color: #555;
+  border-top: 1px dashed #ccc;
+  margin-top: 20px;
+  padding-top: 10px;
+}
+
+/* Audit log section */
+.c4k-form-root .audit-log {
+  background: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px 20px;
+  margin: 20px 50px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.c4k-form-root .audit-log strong {
+  color: #374151;
+}
+
+/* QR code in print */
+.c4k-form-root .qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #919191;
+  background: #fff;
+}
+
+.c4k-form-root .qr-container p {
+  font-size: 10px;
+  text-align: center;
+  margin-top: 4px;
+  word-break: break-all;
+}
+
+/* Set-to-today date button */
+.c4k-form-root .today-btn {
+  background: #2e5496;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: "Montserrat", sans-serif;
+}
+
+.c4k-form-root .today-btn:hover {
+  background: #1e3a6e;
+}
+
+.c4k-form-root .today-btn:focus-visible {
+  outline: 2px solid #FFD700;
+  outline-offset: 2px;
+}
+
+/* ── Print styles ─────────────────────────────────────────────────────────── */
+
+@media print {
+  body > *:not(.c4k-print-root) {
+    display: none !important;
+  }
+
+  .c4k-print-root {
+    display: block !important;
+  }
+
+  .c4k-form-root .page-bottom-note {
+    page-break-after: always;
+  }
+
+  .c4k-form-root .page-header,
+  .c4k-form-root .page-body {
+    padding: 10px 25px;
+  }
+
+  .c4k-form-root .oig > .form-checkbox {
+    margin-bottom: 5px;
+  }
+
+  .c4k-form-root .signatures {
+    margin-top: 0;
+  }
+
+  .c4k-form-root .oig + .oig {
+    margin-top: 7px;
+  }
+
+  .c4k-form-root .ph-title {
+    padding: 0 25px;
+  }
+
+  .c4k-form-root .action-buttons {
+    display: none !important;
+  }
+
+  .c4k-form-root .audit-log {
+    display: none;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .c4k-form-root .computer-info {
+    margin-bottom: 20px;
+  }
+}
