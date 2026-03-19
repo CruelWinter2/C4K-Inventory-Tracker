@@ -23,6 +23,7 @@ const STATUS_STYLES = {
 const FILTER_OPTIONS = [
   { value: 'All',      label: 'All Computers' },
   { value: 'In Stock', label: 'In Stock Only' },
+  { value: 'Pending',  label: 'Pending Only' },
   { value: 'Sold',     label: 'Sold Only' },
 ];
 
@@ -145,7 +146,10 @@ export default function DashboardPage() {
       c.recipient_name?.toLowerCase().includes(q) ||
       c.manufacturer?.toLowerCase().includes(q) ||
       c.modal?.toLowerCase().includes(q);
-    const matchesFilter = statusFilter === 'All' || c.inventory_status === statusFilter;
+    const matchesFilter = statusFilter === 'All' ||
+      (statusFilter === 'Pending'
+        ? (c.inventory_status === 'Pending Review' || c.inventory_status === 'Pending Delivery')
+        : c.inventory_status === statusFilter);
     const recordDate = parseDateStr(c.date_imaged);
     const start = parseDateStr(startDate);
     const end = parseDateStr(endDate);
@@ -214,8 +218,10 @@ export default function DashboardPage() {
         ? `"${s.replace(/"/g, '""')}"` : s;
     };
 
+    // Map internal field names to friendly CSV column headers
+    const HEADER_LABELS = { 'modal': 'model' };
     const csv = [
-      fields.join(','),
+      fields.map(f => HEADER_LABELS[f] || f).join(','),
       ...filtered.map(rec => fields.map(f => esc(rec[f])).join(',')),
     ].join('\n');
 

@@ -1,0 +1,51 @@
+{
+  "summary": "Iteration 7 testing: Pending Only filter (4th toggle button) and CSV export column fix ('modal' -> 'model'). All 11 backend tests pass, all 13 frontend feature requirements verified. Both new features fully working.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "features_verified": {
+    "filter_row_has_4_buttons": "✅ 'All Computers', 'In Stock Only', 'Pending Only', 'Sold Only' visible in correct order",
+    "pending_button_aria_pressed": "✅ Clicking 'Pending Only' sets aria-pressed=true; All/InStock/Sold set to false",
+    "pending_shows_pending_review": "✅ TEST-PEND-REVIEW-001 (Pending Review) visible when Pending Only active",
+    "pending_shows_pending_delivery": "✅ TEST-PEND-DELIVERY-001 (Pending Delivery) visible when Pending Only active",
+    "pending_hides_in_stock": "✅ TEST-BATCH-001 and UI-FORM-SAVE-001 (In Stock) hidden with Pending Only filter",
+    "stats_bar_pending_only": "✅ Total=2, InStock=0, Pending=2, DonatedSold=0 when Pending Only active",
+    "sr_announcement_pending": "✅ SR region announces '2 records shown. Filtered by status: Pending.'",
+    "all_computers_restores": "✅ Clicking 'All Computers' restores all 4 records",
+    "csv_header_model_not_modal": "✅ CSV header has 'model' at position 28 (not 'modal') - HEADER_LABELS fix working",
+    "csv_header_manufacturer": "✅ CSV header has 'manufacturer' at position 27",
+    "csv_data_values_correct": "✅ HP/EliteBook 840, Dell/Latitude 5490, Lenovo/ThinkPad T480, Acer/Aspire 5 all correct",
+    "pending_plus_date_range": "✅ Pending (01/15-01/16 date range) shows 1 record (TEST-PEND-REVIEW-001 only)",
+    "pending_plus_search": "✅ Pending + search 'Lenovo' shows 1 record; SR: 'Search complete, 1 result found for \"Lenovo\". Filtered by status: Pending.'"
+  },
+  "seed_data_creation": "Created TEST-PEND-REVIEW-001 (Lenovo/ThinkPad T480/Pending Review/01-15-2025) and TEST-PEND-DELIVERY-001 (Acer/Aspire 5/Pending Delivery/01-20-2025) for frontend testing; both cleaned up after test completion. Existing records UI-FORM-SAVE-001 (Dell/Latitude 5490/In Stock) and TEST-BATCH-001 (HP/EliteBook 840/In Stock) unchanged.",
+  "test_report_links": [
+    "/app/backend/tests/test_iter7_pending_filter_csv.py",
+    "/app/test_reports/pytest/pytest_iter7.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "HEADER_LABELS = {'modal': 'model'} correctly renames only the 'modal' field in the CSV header while data still reads from c.modal - this is the minimal change approach and works correctly.",
+    "Note: Backend /api/export/csv still uses 'modal' in fieldnames (not renamed). Only the frontend client-side export (handleExport) uses the HEADER_LABELS fix. Both are correct for their respective purposes.",
+    "The FILTER_OPTIONS order in code: All -> In Stock -> Pending -> Sold. This matches the UI render order confirmed in tests.",
+    "matchesFilter: statusFilter === 'Pending' triggers (c.inventory_status === 'Pending Review' || c.inventory_status === 'Pending Delivery') - correctly handles both pending variants."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter7_pending_filter_csv.py"
+  ],
+  "success_rate": {
+    "backend": "100% (11/11 tests pass)",
+    "frontend": "100% (all 13 feature requirements verified)"
+  },
+  "test_credentials": "Admin: admin/Admin@12345",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 7 all features verified: (1) Pending Only filter: 4th toggle button between 'In Stock Only' and 'Sold Only'. Uses state value 'Pending' which maps to inventory_status IN ('Pending Review', 'Pending Delivery'). data-testid='filter-pending'. (2) CSV export: frontend handleExport uses HEADER_LABELS={'modal':'model'} so CSV header shows 'model' not 'modal'. Backend /api/export/csv still has 'modal' (unchanged). Data rows read from c.modal field. Existing test records: UI-FORM-SAVE-001 (Dell/Latitude 5490), TEST-BATCH-001 (HP/EliteBook 840). Admin: admin/Admin@12345.",
+  "rca_of_issue": null
+}
