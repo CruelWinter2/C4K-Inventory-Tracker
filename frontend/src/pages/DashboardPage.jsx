@@ -118,7 +118,6 @@ export default function DashboardPage() {
   const [endDate, setEndDate] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [exporting, setExporting] = useState(false);
   const navigate = useNavigate();
 
   const fetchComputers = useCallback(async () => {
@@ -180,21 +179,53 @@ export default function DashboardPage() {
     }
   };
 
-  const handleExport = async () => {
-    setExporting(true);
-    try {
-      const res = await axios.get(`${API}/export/csv`, { responseType: 'blob' });
-      const url = URL.createObjectURL(res.data);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'c4k_inventory.csv'; a.click();
-      URL.revokeObjectURL(url);
-      toast.success('CSV downloaded successfully');
-    } catch {
-      toast.error('Export failed. Please try again.');
-    } finally {
-      setExporting(false);
+  const handleExport = useCallback(() => {
+    if (filtered.length === 0) {
+      toast.error('No records to export. Adjust your filters to include some records.');
+      return;
     }
-  };
+
+    const fields = [
+      'serial_no', 'inventory_status', 'recipient_name', 'parent_name',
+      'school', 'school_id', 'address', 'city', 'state', 'zip_code', 'phone',
+      'os_win10', 'os_win11', 'os_home', 'os_pro', 'os_activated',
+      'opendns_preferred', 'opendns_alternate',
+      'program_firefox', 'program_chrome', 'program_avira', 'program_libre_office',
+      'program_cd_burner_xp', 'program_java', 'program_vlc_player',
+      'desktop_computer', 'laptop_computer', 'manufacturer', 'modal',
+      'cpu_name', 'cpu_cores', 'cpu_speed', 'ram', 'storage_size',
+      'storage_hdd', 'storage_ssd', 'bios_version', 'special_features',
+      'touch_screen_yes', 'touch_screen_no',
+      'imaged_by', 'date_imaged', 'reviewed_by', 'date_reviewed',
+      'delivered_by', 'date_delivered',
+      'oig_1_1', 'oig_2_1', 'oig_2_2', 'oig_2_3', 'oig_2_4',
+      'oig_3_1', 'oig_3_2', 'oig_3_3', 'oig_3_4', 'oig_3_5', 'oig_3_6', 'oig_3_7',
+      'created_at', 'updated_at', 'created_by',
+    ];
+
+    const esc = (v) => {
+      if (v === null || v === undefined) return '';
+      const s = String(v);
+      return s.includes(',') || s.includes('"') || s.includes('\n')
+        ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+
+    const csv = [
+      fields.join(','),
+      ...filtered.map(rec => fields.map(f => esc(rec[f])).join(',')),
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'c4k_inventory.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    const isFiltered = search || statusFilter !== 'All' || startDate || endDate;
+    toast.success(`Exported ${filtered.length} ${isFiltered ? 'filtered ' : ''}record${filtered.length !== 1 ? 's' : ''}`);
+  }, [filtered, search, statusFilter, startDate, endDate]);
 
   const stats = {
     total: filtered.length,
@@ -225,13 +256,18 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={handleExport}
-              disabled={exporting}
               className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2e5496]"
               data-testid="export-csv-button"
-              aria-label="Export all inventory records to a CSV file"
+              aria-label={
+                (search || statusFilter !== 'All' || startDate || endDate)
+                  ? `Export ${filtered.length} filtered records to CSV`
+                  : 'Export all inventory records to a CSV file'
+              }
             >
               <Download className="w-4 h-4" aria-hidden="true" />
-              {exporting ? 'Exporting...' : 'Export CSV'}
+              {(search || statusFilter !== 'All' || startDate || endDate)
+                ? `Export CSV (${filtered.length})`
+                : 'Export CSV'}
             </button>
             <button
               onClick={() => navigate('/add')}

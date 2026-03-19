@@ -68,7 +68,7 @@ export default function Sidebar({ onExport }) {
               onClick={onExport}
               data-testid="nav-export-data"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-150 w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]"
-              aria-label="Export all inventory data to a CSV file"
+              aria-label="Export currently visible inventory records to a CSV file"
             >
               <Download className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
               <span>Export Data</span>
