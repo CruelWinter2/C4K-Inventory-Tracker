@@ -122,6 +122,15 @@ Full-stack Inventory Management System for **Computers 4 Kids (C4K)** nonprofit 
 - aria-live region announces filter/search result count to screen readers
 - Skip to main content link added to App.js
 
+### Final Feature Implementation (2026-02)
+- **QR codes removed** from PrintViewPage and IntakeFormPage entirely
+- **Logo URL updated** to new job artifacts in both form pages
+- **OIG order fixed** — oig_3_4 (wireless internet) now correctly ordered between oig_3_3 and oig_3_5 in both IntakeFormPage and PrintViewPage
+- **Technician Status Restrictions** — Technicians cannot set status to "Donated" or "Sold" (disabled in UI dropdowns + 403 enforced on backend for both PATCH and PUT endpoints)
+- **Date-Range Filtering** — Start Date / End Date typed text inputs on Dashboard (type=text, no calendar), filters by Date Imaged field (MM/DD/YYYY). Records with no date_imaged excluded when range is active.
+- **Quick Stats Bar** — Shows Total Shown, In Stock, Pending (Pending Review + Pending Delivery), Donated/Sold — all calculated from filtered results, with aria-live="polite" aria-atomic="true"
+- **Print Function Hardening** — Print button shows hint "If the print dialog did not open, press Ctrl+P / Cmd+P" after clicking
+
 ### Code Audit (2025-02)
 - All new buttons: aria-label, data-testid
 - All new modals: role="dialog", aria-modal="true", aria-labelledby, focus trap, Escape to close
@@ -178,10 +187,13 @@ Processing, In Stock, Donated, Sold, Pending Review, Pending Delivery
 - [x] Print view with QR code
 - [x] CSV export
 
-### P1 (High Priority - next)
-- [ ] Multi-user account management (add/remove users from admin panel)
+### P1 (High Priority - done)
+- [x] Multi-user account management (add/remove users from admin panel)
+- [x] Technician status restrictions (Donated/Sold admin-only)
+- [x] Date-range filtering on Dashboard
+- [x] Dashboard Quick Stats Bar (aria-live)
+- [x] Print function hardening
 - [ ] Search by additional fields (Manufacturer, Date Imaged)
-- [ ] Pagination for large inventories (currently loads all 1000)
 - [ ] Backend password strength validation (currently only frontend)
 
 ### P2 (Nice to Have)

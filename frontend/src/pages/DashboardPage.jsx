@@ -146,8 +146,8 @@ export default function DashboardPage() {
     const recordDate = parseDateStr(c.date_imaged);
     const start = parseDateStr(startDate);
     const end = parseDateStr(endDate);
-    const matchesStart = !start || !recordDate || recordDate >= start;
-    const matchesEnd = !end || !recordDate || recordDate <= end;
+    const matchesStart = !start || (recordDate !== null && recordDate >= start);
+    const matchesEnd = !end || (recordDate !== null && recordDate <= end);
     return matchesSearch && matchesFilter && matchesStart && matchesEnd;
   });
 
@@ -384,7 +384,7 @@ export default function DashboardPage() {
                   ) : pageRecords.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="text-center py-16 text-gray-400">
-                        {search || statusFilter !== 'All' ? (
+                        {search || statusFilter !== 'All' || startDate || endDate ? (
                           <div>
                             <p className="font-semibold text-gray-500 mb-1">No matching records found.</p>
                             <button
