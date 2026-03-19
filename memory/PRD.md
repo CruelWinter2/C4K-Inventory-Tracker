@@ -80,7 +80,30 @@ Full-stack Inventory Management System for **Computers 4 Kids (C4K)** nonprofit 
 - Print CSS hides sidebar, action buttons, audit log
 - All field values displayed as read-only
 
-### Accessibility (2025-02)
+### User Management (2025-02)
+- `GET /api/admin/users` - list all users (admin-only)
+- `POST /api/admin/users` - create user (must_change_password=true, admin-only)
+- `PUT /api/admin/users/{username}/reset-password` - reset PW (forces change on next login)
+- `DELETE /api/admin/users/{username}` - delete user (cannot delete own account)
+- UserManagementPage with Add User / Reset PW / Delete modals (all accessible, focus-trapped)
+- Role badges (Admin/Technician), Password Status (Active/Must Change), Created date
+- User Management link in sidebar visible only to admin role users
+- Admin role label "(ADMIN)" shown in sidebar footer
+
+### Dashboard Enhancements (2025-02)
+- Status filter toggles with aria-pressed: All Computers, In Stock Only, Sold Only
+- Client-side pagination at 25 records per page
+- Previous/Next buttons with full aria-labels (e.g., "Go to next page, page 2")
+- "Page X of Y" counter, "Showing X–Y of Z records" count
+- Page resets to 1 when search or filter changes
+- aria-live region announces filter/search result count to screen readers
+- Skip to main content link added to App.js
+
+### Code Audit (2025-02)
+- All new buttons: aria-label, data-testid
+- All new modals: role="dialog", aria-modal="true", aria-labelledby, focus trap, Escape to close
+- Delete confirmation: role="alertdialog"
+- Login response now includes `role` field so sidebar renders correctly immediately after login
 - All interactive elements have `data-testid` attributes
 - All inputs have associated `<label>` elements with `htmlFor`/`id` binding
 - Focus trap in password modal (Tab/Shift+Tab cycling)
