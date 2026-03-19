@@ -122,6 +122,10 @@ Full-stack Inventory Management System for **Computers 4 Kids (C4K)** nonprofit 
 - aria-live region announces filter/search result count to screen readers
 - Skip to main content link added to App.js
 
+### Final Polish (2026-02)
+- **Pending Only filter** — 4th toggle button in Dashboard; maps to both "Pending Review" and "Pending Delivery" statuses. Stats bar and SR announcement update correctly.
+- **CSV export column fix** — Header row now uses `model` (not `modal`) while data correctly reads from `c.modal`. `manufacturer` column confirmed present.
+
 ### Final Search and Print Optimization (2026-02)
 - **Expanded Search** — Dashboard search now matches Serial No., Recipient, Manufacturer, and Model fields. SR live region announces "Search complete, N results found for [term]" with aria-live="polite" aria-atomic="true"
 - **Batch Printing (Print All Visible)** — "Print All (N)" button in header navigates to /print-all route with filtered records in router state. PrintAllPage renders all records stacked with page breaks, auto-triggers window.print() after 600ms, has manual Print All + Back to Dashboard controls
