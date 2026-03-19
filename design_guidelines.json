@@ -1,0 +1,180 @@
+{
+  "project_name": "Computers 4 Kids (C4K) IMS",
+  "design_philosophy": {
+    "persona": "E1: The Anti-AI Designer",
+    "core_principles": [
+      "High Contrast & Clarity (WCAG 2.1 AA)",
+      "Functionality First",
+      "Strict Semantic HTML",
+      "No Generic Templates",
+      "Emotional Tone: Trustworthy, Professional, Accessible"
+    ],
+    "theme": "Light Mode Only (Strict)"
+  },
+  "typography": {
+    "font_family": {
+      "primary": "Montserrat, sans-serif",
+      "fallback": "system-ui, sans-serif"
+    },
+    "scale": {
+      "h1": "text-4xl font-bold tracking-tight",
+      "h2": "text-3xl font-bold tracking-tight",
+      "h3": "text-2xl font-semibold",
+      "body": "text-base font-medium leading-relaxed",
+      "small": "text-sm font-medium",
+      "label": "text-sm font-bold uppercase tracking-wide text-gray-700"
+    },
+    "weights": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    }
+  },
+  "colors": {
+    "brand": {
+      "primary": "#2e5496",
+      "primary_foreground": "#ffffff",
+      "secondary": "#FFD700",
+      "secondary_foreground": "#1A1A1A"
+    },
+    "background": {
+      "app": "#F8F9FA",
+      "card": "#FFFFFF",
+      "sidebar": "#2e5496",
+      "input": "#FFFFFF"
+    },
+    "text": {
+      "primary": "#1A1A1A",
+      "secondary": "#4A4A4A",
+      "inverse": "#FFFFFF",
+      "link": "#2e5496"
+    },
+    "status": {
+      "processing": { "bg": "#e0e7ff", "text": "#2e5496", "border": "#2e5496" },
+      "in_stock": { "bg": "#dcfce7", "text": "#15803d", "border": "#15803d" },
+      "donated": { "bg": "#f3e8ff", "text": "#7e22ce", "border": "#7e22ce" },
+      "sold": { "bg": "#fef3c7", "text": "#b45309", "border": "#b45309" },
+      "pending_review": { "bg": "#fee2e2", "text": "#b91c1c", "border": "#b91c1c" },
+      "pending_delivery": { "bg": "#e0f2fe", "text": "#0369a1", "border": "#0369a1" }
+    },
+    "border": {
+      "default": "#E5E7EB",
+      "input": "#9CA3AF",
+      "active": "#2e5496"
+    }
+  },
+  "layout_strategy": {
+    "dashboard": {
+      "structure": "Sidebar (Fixed Left) + Main Content (Scrollable)",
+      "sidebar_width": "w-64",
+      "main_padding": "p-8",
+      "container_max_width": "max-w-7xl mx-auto"
+    },
+    "print_view": {
+      "media_query": "@media print",
+      "rules": [
+        "Hide Sidebar",
+        "Hide Header/Footer",
+        "Hide Action Buttons",
+        "Show Full Form",
+        "Use 100% Width",
+        "Black Text on White Background"
+      ]
+    },
+    "grid_system": {
+      "form_grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6",
+      "dashboard_cards": "grid grid-cols-1 md:grid-cols-3 gap-6"
+    }
+  },
+  "components": {
+    "buttons": {
+      "base": "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
+      "primary": "bg-[#2e5496] text-white hover:bg-[#1e3a6e] focus-visible:ring-[#FFD700]",
+      "secondary": "bg-[#FFD700] text-[#1A1A1A] hover:bg-[#e6c200] focus-visible:ring-[#2e5496]",
+      "outline": "border-2 border-[#2e5496] text-[#2e5496] hover:bg-[#2e5496] hover:text-white",
+      "destructive": "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600",
+      "ghost": "hover:bg-accent hover:text-accent-foreground"
+    },
+    "inputs": {
+      "base": "flex h-12 w-full rounded-md border-2 border-gray-400 bg-white px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2e5496] focus-visible:border-[#2e5496] disabled:cursor-not-allowed disabled:opacity-50",
+      "label_style": "mb-2 block text-sm font-bold text-gray-900"
+    },
+    "cards": {
+      "base": "rounded-lg border border-gray-200 bg-white text-gray-950 shadow-sm",
+      "header": "flex flex-col space-y-1.5 p-6 border-b border-gray-100",
+      "content": "p-6",
+      "footer": "flex items-center p-6 pt-0"
+    },
+    "sidebar": {
+      "container": "h-screen w-64 bg-[#2e5496] text-white flex flex-col fixed left-0 top-0 z-50",
+      "link_base": "flex items-center gap-3 px-6 py-4 text-sm font-medium transition-colors hover:bg-white/10 w-full",
+      "link_active": "bg-white/20 border-l-4 border-[#FFD700]",
+      "header": "h-16 flex items-center px-6 font-bold text-xl tracking-wider text-white border-b border-white/10"
+    }
+  },
+  "visual_assets": {
+    "login_background": {
+      "url": "https://images.unsplash.com/photo-1540058404349-2e5fabf32d75?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "alt": "Volunteers working with computers",
+      "usage": "Full screen background with overlay on Login page"
+    },
+    "logo": {
+      "type": "icon_composition",
+      "icon": "Star (Lucide React)",
+      "color": "#FFD700",
+      "text": "C4K IMS",
+      "text_color": "#FFFFFF",
+      "description": "Gold Star Icon + Bold White Text"
+    }
+  },
+  "accessibility_rules": {
+    "focus_states": "All interactive elements MUST have a visible focus ring (2px solid #FFD700 or #2e5496).",
+    "contrast": "Text must maintain 4.5:1 ratio (AA) or 7:1 (AAA). Use the provided color palette.",
+    "semantic_html": "Use <main>, <nav>, <aside>, <header>, <footer>. Use <button> for actions, <a> for links.",
+    "forms": "All inputs must have associated <label> elements. No placeholders as labels.",
+    "aria": "Use aria-label for icon-only buttons. Use aria-live for status updates."
+  },
+  "instructions_to_main_agent": {
+    "general": [
+      "Follow the 'E1' persona: clean, structured, no clutter.",
+      "Strictly enforce the Blue (#2e5496) and Gold (#FFD700) theme.",
+      "Ensure the 'View/Print' page matches the 'original' requirement: strict grid, black and white, suitable for printing on paper.",
+      "Use 'sonner' for notifications.",
+      "Use 'lucide-react' for icons.",
+      "Do not use gradients for the dashboard background; keep it clean white/gray."
+    ],
+    "pages": {
+      "login": "Centered card on backdrop image. High contrast inputs.",
+      "dashboard": "Data table with specific status colors. Search bar prominent.",
+      "intake_form": "Grid layout. 'Set to Today' buttons next to date inputs. No dropdowns - text inputs only.",
+      "print_view": "Minimalist. No sidebar. High density for printing."
+    },
+    "tech_stack": {
+      "frontend": "React (JS), Tailwind, Shadcn UI, Axios, React Router",
+      "backend": "FastAPI, MongoDB (Motor)",
+      "styling": "Tailwind classes provided in 'components' section."
+    }
+  },
+  "universal_guidelines": [
+    "You tend to converge toward generic, 'on distribution' outputs. In frontend design, this creates what users call the 'AI slop' aesthetic. Avoid this: make creative, distinctive frontends that surprise and delight.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file. This disrupts the human natural reading flow of text",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN",
+    "Prioritize using pre-existing components from src/components/ui when applicable",
+    "Create new components that match the style and conventions of existing components when needed",
+    "Examine existing components to understand the project's component patterns before creating new ones",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use 'sonner' for toasts",
+    "Sonner component are located in /app/frontend/src/components/ui/sonner.jsx"
+  ]
+}
