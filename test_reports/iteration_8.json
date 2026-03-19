@@ -1,0 +1,61 @@
+{
+  "summary": "Iteration 8: Edit Functionality Polish + First-Time Setup Screen. All 12 backend tests pass (100%). All 17 frontend feature requirements verified (100%). Full end-to-end edit save flow working (badge, readOnly serial, Update Record button, PUT to backend, success toast, dashboard redirect with updated data).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "features_verified": {
+    "edit_button_navigates": "✅ data-testid=edit-btn-TEST-BATCH-001 navigates to /edit/TEST-BATCH-001",
+    "edit_form_prepopulates_all_fields": "✅ serial_no=TEST-BATCH-001, manufacturer=HP, modal=EliteBook 840, recipient_name=Test Recipient all pre-populated",
+    "serial_no_readonly_in_edit": "✅ Serial No. field has readonly attribute and cursor:not-allowed style in edit mode",
+    "editing_badge_visible": "✅ data-testid=editing-badge present in action bar with text 'Editing: TEST-BATCH-001' (amber background)",
+    "editing_badge_not_in_add_mode": "✅ Editing badge (data-testid=editing-badge) NOT found in /add mode",
+    "save_button_update_record": "✅ Save button text is 'Update Record' in edit mode",
+    "save_button_save_record": "✅ Save button text is 'Save Record' in add mode",
+    "put_endpoint_200": "✅ PUT /api/computers/{serial_no} returns 200 with updated record",
+    "put_preserves_created_at": "✅ PUT preserves created_at and created_by from original record",
+    "put_returns_404_nonexistent": "✅ PUT returns 404 for non-existent serial_no",
+    "put_403_technician_donated": "✅ PUT returns 403 when technician tries to set status=Donated",
+    "put_403_technician_sold": "✅ PUT returns 403 when technician tries to set status=Sold",
+    "put_200_technician_in_stock": "✅ PUT returns 200 when technician sets non-restricted status (In Stock)",
+    "setup_status_false": "✅ GET /api/setup/status returns {setup_required: false} when users exist",
+    "setup_init_403": "✅ POST /api/setup/init returns 403 with 'Setup already completed' message when users exist",
+    "setup_endpoints_public": "✅ Both /api/setup/status and /api/setup/init are public (no auth required)",
+    "login_no_redirect_to_setup": "✅ LoginPage does NOT redirect to /setup when setup_required=false",
+    "setup_page_redirects_to_login": "✅ SetupPage at /setup correctly redirects to /login when setup_required=false (correct behavior)",
+    "setup_page_form_renders": "✅ SetupPage renders username, password, confirm password fields (verified with mocked setup_required=true)",
+    "setup_page_submit_disabled_initially": "✅ Submit button disabled when form is empty/rules not met",
+    "setup_page_password_rules_green": "✅ All 4 password rules turn green when criteria met (8 chars, uppercase, number, passwords match)",
+    "setup_page_submit_enabled": "✅ Submit button enabled when all rules met and username >= 3 chars",
+    "e2e_edit_save_flow": "✅ Full edit flow: badge visible → fields pre-populated → Update Record click → PUT succeeds → 'Record updated successfully' toast → redirect to dashboard → data reflected in table"
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iter8_edit_setup.py",
+    "/app/test_reports/pytest/pytest_iter8.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "SetupPage correctly calls GET /api/setup/status on mount and redirects to /login if setup_required=false - prevents unauthorized access to setup form",
+    "IntakeFormPage: editing-badge only renders when isEdit=true (Boolean(serialNo)) - clean implementation",
+    "PUT endpoint correctly preserves created_at/created_by from existing doc: update_doc['created_at'] = existing.get('created_at', ...) - correct pattern",
+    "startup() event no longer auto-creates admin user - first-time setup is handled entirely through /setup UI flow and /api/setup/init endpoint"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter8_edit_setup.py"
+  ],
+  "success_rate": {
+    "backend": "100% (12/12 tests pass)",
+    "frontend": "100% (all 23 feature requirements verified)"
+  },
+  "test_credentials": "Admin: admin/Admin@12345",
+  "seed_data_creation": "Created TEST-EDIT-ITER8-001 (HP/ProBook 450/In Stock) for backend PUT tests; cleaned up automatically. Created test_tech_iter8 technician for RBAC tests. TEST-BATCH-001 recipient name temporarily changed to 'Test Recipient Updated' during e2e test; restored to 'Test Recipient' after test.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 8 all features verified: (1) Edit form polish: editing-badge (data-testid=editing-badge) shows 'Editing: {serial_no}' in amber when isEdit=true, Save button says 'Update Record' in edit mode / 'Save Record' in add mode, Serial No field has readonly attr in edit mode. PUT /api/computers/{serial_no} preserves created_at/created_by. (2) Setup: GET /api/setup/status public, returns {setup_required: bool}. POST /api/setup/init public, 403 when users exist. SetupPage auto-redirects to /login if setup_required=false. SetupPage has 4 password rules that turn green. Current records: TEST-BATCH-001 (HP/EliteBook 840/In Stock/Test Recipient), UI-FORM-SAVE-001 (Dell/Latitude 5490/In Stock/Test Edit User). Admin: admin/Admin@12345.",
+  "rca_of_issue": null
+}

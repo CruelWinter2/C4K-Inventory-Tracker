@@ -173,6 +173,50 @@ class ComputerData(BaseModel):
     inventory_status: Optional[str] = "Processing"
 
 
+class SetupInitRequest(BaseModel):
+    username: str
+    password: str
+    confirm_password: str
+
+
+# ── setup routes (no auth required) ──────────────────────────────────────────
+
+@api_router.get("/setup/status")
+async def setup_status():
+    """Returns whether initial admin setup is required. No auth needed."""
+    count = await db.users.count_documents({})
+    return {"setup_required": count == 0}
+
+
+@api_router.post("/setup/init", status_code=201)
+async def setup_init(data: SetupInitRequest):
+    """Creates the first admin account. Only works when the database has no users."""
+    import re
+    count = await db.users.count_documents({})
+    if count > 0:
+        raise HTTPException(status_code=403, detail="Setup already completed. Please log in.")
+    if len(data.username.strip()) < 3:
+        raise HTTPException(status_code=400, detail="Username must be at least 3 characters")
+    if data.password != data.confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match")
+    if len(data.password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    if not re.search(r'[A-Z]', data.password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter")
+    if not re.search(r'\d', data.password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one number")
+    doc = {
+        "username": data.username.strip().lower(),
+        "hashed_password": hash_password(data.password),
+        "role": "admin",
+        "must_change_password": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.users.insert_one(doc)
+    logger.info("First-time setup complete. Admin user created: %s", data.username.strip().lower())
+    return {"message": "Admin account created. You can now sign in."}
+
+
 # ── auth routes ───────────────────────────────────────────────────────────────
 
 @api_router.post("/auth/login")
@@ -399,14 +443,12 @@ app.include_router(api_router)
 async def startup():
     existing = await db.users.find_one({"username": "admin"})
     if not existing:
-        await db.users.insert_one({
-            "username": "admin",
-            "hashed_password": hash_password("admin"),
-            "role": "admin",
-            "must_change_password": True,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        })
-        logger.info("Default admin user created (must change password on first login)")
+        count = await db.users.count_documents({})
+        if count == 0:
+            # No users at all — the SetupPage will handle first-time setup.
+            # We do NOT auto-create a default admin here; the setup screen
+            # allows the operator to choose a secure password.
+            logger.info("No users found. First-time setup required at /setup.")
     await db.computers.create_index("serial_no", unique=True)
     await db.users.create_index("username", unique=True)
 

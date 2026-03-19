@@ -152,6 +152,18 @@ export default function IntakeFormPage() {
                 Back to Dashboard
               </button>
 
+              {/* Editing mode indicator */}
+              {isEdit && (
+                <span
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide"
+                  style={{ background: '#FFF3CD', color: '#856404', border: '1px solid #FFEEBA' }}
+                  aria-label={`Editing record: ${decodedSerial}`}
+                  data-testid="editing-badge"
+                >
+                  Editing: {decodedSerial}
+                </span>
+              )}
+
               <div className="flex items-center gap-2 ml-4">
                 <label htmlFor="form-status" className="text-sm font-semibold text-gray-700 whitespace-nowrap">
                   Status:

@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import ForcePasswordModal from '../components/ForcePasswordModal';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -12,6 +15,17 @@ export default function LoginPage() {
   const [showModal, setShowModal] = useState(false);
   const { login, onPasswordChanged } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect to setup if no admin users exist yet
+  useEffect(() => {
+    axios.get(`${API}/setup/status`)
+      .then(res => {
+        if (res.data.setup_required) {
+          navigate('/setup', { replace: true });
+        }
+      })
+      .catch(() => {/* network error — show login normally */});
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

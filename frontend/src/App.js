@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import LoginPage from './pages/LoginPage';
+import SetupPage from './pages/SetupPage';
 import DashboardPage from './pages/DashboardPage';
 import IntakeFormPage from './pages/IntakeFormPage';
 import PrintViewPage from './pages/PrintViewPage';
@@ -18,6 +19,7 @@ function App() {
         <a href="#main-content" className="skip-link">Skip to main content</a>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/setup" element={<SetupPage />} />
           <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="/add" element={<ProtectedRoute><IntakeFormPage /></ProtectedRoute>} />
           <Route path="/edit/:serialNo" element={<ProtectedRoute><IntakeFormPage /></ProtectedRoute>} />
