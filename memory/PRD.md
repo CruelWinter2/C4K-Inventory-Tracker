@@ -122,6 +122,11 @@ Full-stack Inventory Management System for **Computers 4 Kids (C4K)** nonprofit 
 - aria-live region announces filter/search result count to screen readers
 - Skip to main content link added to App.js
 
+### Final Search and Print Optimization (2026-02)
+- **Expanded Search** — Dashboard search now matches Serial No., Recipient, Manufacturer, and Model fields. SR live region announces "Search complete, N results found for [term]" with aria-live="polite" aria-atomic="true"
+- **Batch Printing (Print All Visible)** — "Print All (N)" button in header navigates to /print-all route with filtered records in router state. PrintAllPage renders all records stacked with page breaks, auto-triggers window.print() after 600ms, has manual Print All + Back to Dashboard controls
+- **GitHub Sync** — User directed to "Save to Github" feature
+
 ### Final Feature Polish (2026-02)
 - **Filtered CSV Export** — Export CSV is now client-side from the `filtered` array (no API call). Button shows "Export CSV (N)" when filters are active. Both header button and sidebar "Export Data" link export only visible records. Error toast if no records match.
 - **RBAC User Management confirmed** — Sidebar hides link for technicians, AdminRoute blocks /users with accessible access-denied screen + 3s auto-redirect
