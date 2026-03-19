@@ -1,0 +1,33 @@
+Computers 4 Kids: Inventory Management System - Fork Summary
+ROLE: Expert Full-Stack Web Developer, Accessibility Specialist, and UI/UX Architect.
+OBJECTIVE: Convert a static HTML intake form into a secure, accessible Inventory Management System. CRITICAL: The intake form must strictly follow the original HTML/CSS provided in the first message. No extra visual elements (like QR codes) are permitted within the form.
+________________________________________
+PRODUCT REQUIREMENTS (UPDATED)
+•	UI/Layout: REVERT TO ORIGINAL. The intake form must look exactly like the initial static index.html. Remove all QR code generation and scanner-related UI.
+•	Core Architecture: React/Next.js frontend, FastAPI/Node.js backend, MongoDB/PostgreSQL database. Use Serial No. as the primary key.
+•	Strict Accessibility (a11y): WCAG 2.1 AA Compliance. Every field must be a text input (typed-entry only). No dropdowns or calendar widgets. Use aria-live for filter updates and proper focus traps for modals.
+•	Authentication & RBAC: JWT-based login with Admin and Technician roles.
+o	Admin: Full CRUD, User Management, can delete records.
+o	Technician: Add/Edit records only. Cannot delete records or access User Management.
+•	Admin Credentials: admin / Admin@12345 (First-login password change already completed).
+________________________________________
+UPCOMING TASKS (PRIORITY LIST)
+1.	P0: UI Restoration & QR Removal: - Delete all QR code libraries and visual components.
+o	Revert the Intake Form component to match the original static HTML provided by the user.
+2.	P0: Implement Technician Status Restrictions: - Technicians must be blocked from changing any computer status to Donated or Sold. Only Admins can perform these actions.
+3.	P0: Implement Date-Range Filtering: - Add Start Date and End Date manual text inputs to the dashboard. Filter records by Date Imaged or Date Delivered.
+4.	P0: Dashboard Quick Stats Bar: - Add a top-level summary bar (Total In Stock, Pending, etc.) wrapped in aria-live=polite for instant screen reader announcements.
+5.	P1: Print Function Hardening: - Optimize handlePrint to use window.print() in a way that avoids Browser Locker security warnings in Chromium.
+________________________________________
+COMPLETED WORK (STABLE BACKEND)
+•	Authentication Flow: JWT login and accessible password-reset modal implemented.
+•	User Management: Full CRUD for technician accounts completed.
+•	Pagination & Filtering: Advanced pagination with page numbers and aria-label logic is fully functional.
+•	Internal Activity Log: Tracking for Created By and Updated By is implemented in the database.
+________________________________________
+CRITICAL INFO FOR NEW AGENT
+•	SCREEN READER FRIENDLY: This project is for a visually impaired user. Do not use visual-only widgets. Every interactive element must be keyboard-navigable and have a descriptive aria-label.
+•	NO SCANNER: The user does not use a physical scanner. All inputs must remain as standard text fields.
+•	NO DEPLOYMENT: Do not use credits for deployment. Focus purely on code modularity and GitHub synchronization.
+
+

@@ -3,7 +3,7 @@
 ## Project Overview
 Full-stack Inventory Management System for **Computers 4 Kids (C4K)** nonprofit (West Sacramento, CA). Converts a static HTML computer intake/donation form into a secure, production-ready web application.
 
-**Live URL:** https://c4k-intake-system.preview.emergentagent.com
+**Live URL:** https://c4k-admin-dashboard.preview.emergentagent.com
 
 ---
 
@@ -205,6 +205,6 @@ JWT_SECRET_KEY=c4k-inventory-2025-prod-secret-key-change-me
 
 ### Frontend (`/app/frontend/.env`)
 ```
-REACT_APP_BACKEND_URL=https://c4k-intake-system.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://c4k-admin-dashboard.preview.emergentagent.com
 WDS_SOCKET_PORT=443
 ```
