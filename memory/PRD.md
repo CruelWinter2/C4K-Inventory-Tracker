@@ -122,7 +122,9 @@ Full-stack Inventory Management System for **Computers 4 Kids (C4K)** nonprofit 
 - aria-live region announces filter/search result count to screen readers
 - Skip to main content link added to App.js
 
-### Final Feature Implementation (2026-02)
+### Final Feature Polish (2026-02)
+- **Filtered CSV Export** — Export CSV is now client-side from the `filtered` array (no API call). Button shows "Export CSV (N)" when filters are active. Both header button and sidebar "Export Data" link export only visible records. Error toast if no records match.
+- **RBAC User Management confirmed** — Sidebar hides link for technicians, AdminRoute blocks /users with accessible access-denied screen + 3s auto-redirect
 - **QR codes removed** from PrintViewPage and IntakeFormPage entirely
 - **Logo URL updated** to new job artifacts in both form pages
 - **OIG order fixed** — oig_3_4 (wireless internet) now correctly ordered between oig_3_3 and oig_3_5 in both IntakeFormPage and PrintViewPage
