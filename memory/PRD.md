@@ -80,7 +80,30 @@ Full-stack Inventory Management System for **Computers 4 Kids (C4K)** nonprofit 
 - Print CSS hides sidebar, action buttons, audit log
 - All field values displayed as read-only
 
-### User Management (2025-02)
+### RBAC Technician Restrictions (2025-02)
+- Delete button hidden from Dashboard for Technician role (admin-only via `isAdmin` check)
+- `AdminRoute` component wraps `/users` — non-admins see accessible "Access Denied" screen
+- Access Denied: `role="alert"`, `aria-live="assertive"`, 3-second countdown, auto-redirect to Dashboard
+- User Management sidebar link already admin-only (from previous phase)
+- Backend DELETE /admin/users already admin-only via `get_admin_user` dependency
+
+### Advanced Pagination (2025-02)
+- `getPageRange(current, total)` produces smart page list with ellipsis for >7 pages
+- Each page button: `aria-label="Jump to page N"`, `aria-current="page"` for active page
+- `data-testid="pagination-page-N"` on every page number button
+- Previous: `aria-label="Go to previous page"`, Next: `aria-label="Go to next page"`
+- Ellipsis rendered as `aria-hidden="true"` decorative spans
+
+### Activity Log (2025-02)
+- Collapsible section at bottom of IntakeFormPage (edit mode only)
+- Toggle button with `aria-expanded` and `aria-controls="activity-log-content"`
+- Shows: "Record created by [username] on [date]" and "Last updated by [username] on [date]"
+- Backend: `updated_by` field saved to database on every PUT /api/computers/{serial_no}
+- `updated_by` extracted from API response and displayed
+
+### Accessibility Sweep (2025-02)
+- Role badges in User Management: `aria-label="Role: Admin"` and `aria-label="Role: Technician"`
+- Access Denied screen: `role="alert"`, `aria-live="assertive"`, `aria-atomic="true"`
 - `GET /api/admin/users` - list all users (admin-only)
 - `POST /api/admin/users` - create user (must_change_password=true, admin-only)
 - `PUT /api/admin/users/{username}/reset-password` - reset PW (forces change on next login)
