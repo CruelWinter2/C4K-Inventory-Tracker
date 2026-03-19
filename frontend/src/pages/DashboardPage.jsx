@@ -4,6 +4,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Search, Plus, Edit2, Eye, Trash2, Download, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
+import { useAuth } from '../context/AuthContext';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -79,7 +80,26 @@ function ConfirmDeleteDialog({ computer, onConfirm, onCancel }) {
   );
 }
 
+/** Returns array of page numbers with 'ellipsis-N' strings for gaps. */
+function getPageRange(current, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const delta = 2;
+  const pages = new Set([1, total]);
+  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+    pages.add(i);
+  }
+  const sorted = [...pages].sort((a, b) => a - b);
+  const result = [];
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push(`ellipsis-${i}`);
+    result.push(sorted[i]);
+  }
+  return result;
+}
+
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const [computers, setComputers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -370,14 +390,16 @@ export default function DashboardPage() {
                             >
                               <Eye className="w-4 h-4" aria-hidden="true" />
                             </button>
-                            <button
-                              onClick={() => setDeleteTarget(computer)}
-                              aria-label={`Delete record for serial number ${computer.serial_no}`}
-                              className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                              data-testid={`delete-btn-${computer.serial_no}`}
-                            >
-                              <Trash2 className="w-4 h-4" aria-hidden="true" />
-                            </button>
+                            {isAdmin && (
+                              <button
+                                onClick={() => setDeleteTarget(computer)}
+                                aria-label={`Delete record for serial number ${computer.serial_no}`}
+                                className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                                data-testid={`delete-btn-${computer.serial_no}`}
+                              >
+                                <Trash2 className="w-4 h-4" aria-hidden="true" />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -389,34 +411,55 @@ export default function DashboardPage() {
 
             {/* Pagination footer */}
             {!loading && filtered.length > 0 && (
-              <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between gap-4">
+              <div className="px-4 py-3 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <p className="text-xs text-gray-500" aria-live="polite" aria-atomic="true">
                   Showing <strong>{pageStart + 1}–{Math.min(pageStart + RECORDS_PER_PAGE, filtered.length)}</strong> of <strong>{filtered.length}</strong> records
                   {statusFilter !== 'All' && <span className="text-[#2e5496]"> (filtered)</span>}
                 </p>
-                <nav aria-label="Pagination navigation" className="flex items-center gap-2">
+
+                <nav aria-label="Pagination navigation" className="flex items-center gap-1">
+                  {/* Previous */}
                   <button
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     disabled={safePage <= 1}
-                    aria-label={`Go to previous page, page ${safePage - 1}`}
+                    aria-label="Go to previous page"
                     aria-disabled={safePage <= 1}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2e5496]"
+                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2e5496]"
                     data-testid="pagination-prev"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
                     Previous
                   </button>
 
-                  <span className="text-xs text-gray-600 font-medium px-1" aria-current="page">
-                    Page {safePage} of {totalPages}
-                  </span>
+                  {/* Page number buttons */}
+                  {getPageRange(safePage, totalPages).map(page =>
+                    typeof page === 'string' ? (
+                      <span key={page} className="px-1 text-gray-400 text-xs select-none" aria-hidden="true">…</span>
+                    ) : (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        aria-label={`Jump to page ${page}`}
+                        aria-current={page === safePage ? 'page' : undefined}
+                        className={`w-8 h-8 text-xs font-semibold rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2e5496]
+                          ${page === safePage
+                            ? 'bg-[#2e5496] text-white border-[#2e5496]'
+                            : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
+                        data-testid={`pagination-page-${page}`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )}
 
+                  {/* Next */}
                   <button
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     disabled={safePage >= totalPages}
-                    aria-label={`Go to next page, page ${safePage + 1}`}
+                    aria-label="Go to next page"
                     aria-disabled={safePage >= totalPages}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2e5496]"
+                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2e5496]"
                     data-testid="pagination-next"
                   >
                     Next

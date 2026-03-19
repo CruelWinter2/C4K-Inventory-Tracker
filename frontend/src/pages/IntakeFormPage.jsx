@@ -43,7 +43,8 @@ export default function IntakeFormPage() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState(INITIAL_FORM);
-  const [audit, setAudit] = useState({ created_at: null, updated_at: null, created_by: null });
+  const [audit, setAudit] = useState({ created_at: null, updated_at: null, created_by: null, updated_by: null });
+  const [logOpen, setLogOpen] = useState(false);
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [announcement, setAnnouncement] = useState('');
@@ -58,9 +59,9 @@ export default function IntakeFormPage() {
     if (!isEdit) return;
     axios.get(`${API}/computers/${encodeURIComponent(decodedSerial)}`)
       .then(res => {
-        const { id, created_at, updated_at, created_by, ...fields } = res.data;
+        const { id, created_at, updated_at, created_by, updated_by, ...fields } = res.data;
         setFormData({ ...INITIAL_FORM, ...fields });
-        setAudit({ created_at, updated_at, created_by });
+        setAudit({ created_at, updated_at, created_by, updated_by });
       })
       .catch(() => toast.error('Failed to load computer record'))
       .finally(() => setLoading(false));
@@ -594,15 +595,67 @@ export default function IntakeFormPage() {
                 </div>
               </div>
 
-              {/* ── Audit Log ── */}
+              {/* ── Activity Log (collapsible) ── */}
               {isEdit && (audit.created_at || audit.updated_at) && (
-                <div className="audit-log" aria-label="Record audit information">
-                  <p>
-                    <strong>Created:</strong> {audit.created_at ? new Date(audit.created_at).toLocaleString() : '—'}
-                    {audit.created_by && <> by <strong>{audit.created_by}</strong></>}
-                    &nbsp;&nbsp;|&nbsp;&nbsp;
-                    <strong>Last Updated:</strong> {audit.updated_at ? new Date(audit.updated_at).toLocaleString() : '—'}
-                  </p>
+                <div className="audit-log" style={{ marginBottom: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => setLogOpen(o => !o)}
+                    aria-expanded={logOpen}
+                    aria-controls="activity-log-content"
+                    className="flex items-center gap-2 w-full text-left text-xs font-bold text-gray-600 hover:text-[#2e5496] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2e5496] py-1"
+                    data-testid="activity-log-toggle"
+                  >
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        display: 'inline-block',
+                        transform: logOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.15s ease',
+                        fontSize: 10
+                      }}
+                    >
+                      ▶
+                    </span>
+                    Activity Log
+                  </button>
+
+                  {logOpen && (
+                    <div
+                      id="activity-log-content"
+                      role="region"
+                      aria-label="Activity log for this computer record"
+                      className="mt-3 space-y-2 text-xs text-gray-600 border-t border-gray-200 pt-3"
+                      data-testid="activity-log-content"
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="w-2 h-2 bg-[#2e5496] rounded-full mt-1 flex-shrink-0" aria-hidden="true" />
+                        <p>
+                          <strong className="text-gray-900">Record created</strong>
+                          {audit.created_by && (
+                            <> by <strong className="text-[#2e5496]">{audit.created_by}</strong></>
+                          )}
+                          {audit.created_at && (
+                            <> on {new Date(audit.created_at).toLocaleString()}</>
+                          )}
+                        </p>
+                      </div>
+                      {audit.updated_at && audit.updated_at !== audit.created_at && (
+                        <div className="flex items-start gap-2">
+                          <span className="w-2 h-2 bg-amber-500 rounded-full mt-1 flex-shrink-0" aria-hidden="true" />
+                          <p>
+                            <strong className="text-gray-900">Last updated</strong>
+                            {audit.updated_by && (
+                              <> by <strong className="text-[#2e5496]">{audit.updated_by}</strong></>
+                            )}
+                            {audit.updated_at && (
+                              <> on {new Date(audit.updated_at).toLocaleString()}</>
+                            )}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

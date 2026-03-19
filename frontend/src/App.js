@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import IntakeFormPage from './pages/IntakeFormPage';
@@ -20,7 +21,13 @@ function App() {
           <Route path="/add" element={<ProtectedRoute><IntakeFormPage /></ProtectedRoute>} />
           <Route path="/edit/:serialNo" element={<ProtectedRoute><IntakeFormPage /></ProtectedRoute>} />
           <Route path="/print/:serialNo" element={<ProtectedRoute><PrintViewPage /></ProtectedRoute>} />
-          <Route path="/users" element={<ProtectedRoute><UserManagementPage /></ProtectedRoute>} />
+          <Route path="/users" element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <UserManagementPage />
+              </AdminRoute>
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Toaster richColors position="top-right" />

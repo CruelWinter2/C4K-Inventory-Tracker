@@ -386,11 +386,17 @@ export default function UserManagementPage() {
                       <td className="px-5 py-3.5 font-semibold text-gray-900">{u.username}</td>
                       <td className="px-5 py-3.5">
                         {u.role === 'admin' ? (
-                          <span className="inline-flex items-center gap-1.5 bg-[#e0e7ff] text-[#2e5496] border border-[#2e5496] text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                          <span
+                            aria-label="Role: Admin"
+                            className="inline-flex items-center gap-1.5 bg-[#e0e7ff] text-[#2e5496] border border-[#2e5496] text-xs font-semibold px-2.5 py-0.5 rounded-full"
+                          >
                             <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" /> Admin
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-600 border border-gray-300 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                          <span
+                            aria-label="Role: Technician"
+                            className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-600 border border-gray-300 text-xs font-semibold px-2.5 py-0.5 rounded-full"
+                          >
                             <Wrench className="w-3.5 h-3.5" aria-hidden="true" /> Technician
                           </span>
                         )}

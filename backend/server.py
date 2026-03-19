@@ -246,6 +246,7 @@ async def update_computer(serial_no: str, data: ComputerData, current_user=Depen
         raise HTTPException(status_code=404, detail="Computer not found")
     update_doc = data.model_dump()
     update_doc["updated_at"] = datetime.now(timezone.utc).isoformat()
+    update_doc["updated_by"] = current_user["username"]
     update_doc["created_at"] = existing.get("created_at", update_doc["updated_at"])
     update_doc["created_by"] = existing.get("created_by", current_user["username"])
     await db.computers.update_one({"serial_no": serial_no}, {"$set": update_doc})
