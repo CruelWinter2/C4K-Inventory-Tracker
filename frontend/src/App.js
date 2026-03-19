@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import IntakeFormPage from './pages/IntakeFormPage';
 import PrintViewPage from './pages/PrintViewPage';
+import PrintAllPage from './pages/PrintAllPage';
 import UserManagementPage from './pages/UserManagementPage';
 import { Toaster } from './components/ui/sonner';
 import './App.css';
@@ -21,6 +22,7 @@ function App() {
           <Route path="/add" element={<ProtectedRoute><IntakeFormPage /></ProtectedRoute>} />
           <Route path="/edit/:serialNo" element={<ProtectedRoute><IntakeFormPage /></ProtectedRoute>} />
           <Route path="/print/:serialNo" element={<ProtectedRoute><PrintViewPage /></ProtectedRoute>} />
+          <Route path="/print-all" element={<ProtectedRoute><PrintAllPage /></ProtectedRoute>} />
           <Route path="/users" element={
             <ProtectedRoute>
               <AdminRoute>

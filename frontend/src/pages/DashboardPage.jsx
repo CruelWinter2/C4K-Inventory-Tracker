@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Search, Plus, Edit2, Eye, Trash2, Download, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Plus, Edit2, Eye, Trash2, Download, RefreshCw, ChevronLeft, ChevronRight, Printer } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
 
@@ -140,7 +140,11 @@ export default function DashboardPage() {
   // Apply search + status filter + date range
   const filtered = computers.filter(c => {
     const q = search.toLowerCase();
-    const matchesSearch = !q || c.serial_no?.toLowerCase().includes(q) || c.recipient_name?.toLowerCase().includes(q);
+    const matchesSearch = !q ||
+      c.serial_no?.toLowerCase().includes(q) ||
+      c.recipient_name?.toLowerCase().includes(q) ||
+      c.manufacturer?.toLowerCase().includes(q) ||
+      c.modal?.toLowerCase().includes(q);
     const matchesFilter = statusFilter === 'All' || c.inventory_status === statusFilter;
     const recordDate = parseDateStr(c.date_imaged);
     const start = parseDateStr(startDate);
@@ -269,6 +273,23 @@ export default function DashboardPage() {
                 ? `Export CSV (${filtered.length})`
                 : 'Export CSV'}
             </button>
+
+            {/* Print All Visible */}
+            <button
+              onClick={() => {
+                if (filtered.length === 0) {
+                  toast.error('No records to print. Adjust your filters first.');
+                  return;
+                }
+                navigate('/print-all', { state: { records: filtered } });
+              }}
+              className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2e5496]"
+              data-testid="print-all-button"
+              aria-label={`Print all ${filtered.length} currently visible record${filtered.length !== 1 ? 's' : ''}`}
+            >
+              <Printer className="w-4 h-4" aria-hidden="true" />
+              {`Print All (${filtered.length})`}
+            </button>
             <button
               onClick={() => navigate('/add')}
               className="flex items-center gap-2 bg-[#2e5496] hover:bg-[#1e3a6e] text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]"
@@ -313,7 +334,7 @@ export default function DashboardPage() {
                 id="inventory-search"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search by Serial No. or Recipient Name..."
+                placeholder="Search by Serial No., Recipient, Manufacturer, or Model..."
                 aria-label="Search inventory by serial number or recipient name"
                 className="w-full border-2 border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#2e5496] focus:ring-2 focus:ring-[#2e5496]/20 bg-white"
                 data-testid="search-input"
@@ -346,12 +367,14 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Filter summary for screen readers */}
-          <div aria-live="polite" aria-atomic="true" className="sr-only">
-            {statusFilter !== 'All' ? `Showing ${statusFilter} computers only. ` : ''}
-            {search ? `Searching for "${search}". ` : ''}
-            {(startDate || endDate) ? `Date range: ${startDate || 'any'} to ${endDate || 'any'}. ` : ''}
-            {filtered.length} {filtered.length === 1 ? 'record' : 'records'} found.
+          {/* Screen reader live region — search & filter announcements */}
+          <div aria-live="polite" aria-atomic="true" className="sr-only" data-testid="sr-announcement">
+            {search
+              ? `Search complete, ${filtered.length} ${filtered.length === 1 ? 'result' : 'results'} found for "${search}".`
+              : `${filtered.length} ${filtered.length === 1 ? 'record' : 'records'} shown.`
+            }
+            {statusFilter !== 'All' ? ` Filtered by status: ${statusFilter}.` : ''}
+            {(startDate || endDate) ? ` Date range: ${startDate || 'any'} to ${endDate || 'any'}.` : ''}
           </div>
 
           {/* Date Range filter row */}

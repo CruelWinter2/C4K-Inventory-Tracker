@@ -473,4 +473,10 @@
   .c4k-form-root .computer-info {
     margin-bottom: 20px;
   }
+
+  /* Batch print page-break between records */
+  .c4k-batch-break {
+    page-break-after: always;
+    break-after: page;
+  }
 }
