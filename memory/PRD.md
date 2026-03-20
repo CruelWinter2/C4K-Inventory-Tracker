@@ -122,6 +122,13 @@ Full-stack Inventory Management System for **Computers 4 Kids (C4K)** nonprofit 
 - aria-live region announces filter/search result count to screen readers
 - Skip to main content link added to App.js
 
+### UI/UX Polish + Mobile + Print Fix (2026-03)
+- **Print CSS fixed** — removed broken `body > *:not(.c4k-print-root)` rule that caused blank pages. Replaced with targeted `aside, nav, .no-print, .action-buttons` hiding. Added `page-break-inside: avoid` on `.oig`, `.softwares-info`, `.computer-info`, `.recipient-info`, `table`, `tr`. `@page` margin set.
+- **Mobile responsive** — Sidebar hamburger (`data-testid=mobile-menu-btn`, `md:hidden`) with slide-in animation + backdrop overlay. All pages changed to `md:ml-64` + `pt-14 md:pt-0`. Form sections wrap on small screens.
+- **Telemetry removed** — `index.html` rewritten: removed Emergent badge, `emergent-main.js`, PostHog analytics. Title changed to `C4K Inventory System`.
+- **Environment config confirmed** — Zero hardcoded localhost/IP addresses; all API calls use `REACT_APP_BACKEND_URL`.
+- **Last Login tracking** — `POST /auth/login` writes `last_login` ISO timestamp to MongoDB. `user_to_dict` includes it. User Management table shows formatted date or "Never" per user (`data-testid=last-login-{username}`).
+
 ### Edit Functionality Polish + First-Time Setup (2026-02)
 - **Edit mode made unmistakable** — Amber "EDITING: [serial_no]" badge in action bar, Serial No. locked (readOnly), button says "Update Record". PUT endpoint preserves created_at/created_by.
 - **First-time setup screen** — GET /api/setup/status (no auth), POST /api/setup/init (no auth, 403 if users exist). SetupPage at /setup with branded form, live password rules checklist (8 chars, uppercase, number, match). LoginPage auto-redirects to /setup when setup_required=true. Startup() no longer auto-creates default admin.
