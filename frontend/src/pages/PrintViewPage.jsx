@@ -4,8 +4,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Printer, ArrowLeft } from 'lucide-react';
 import '../styles/form.css';
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API_BASE } from '../utils/api';
 
 function Checkbox({ checked, label }) {
   return (
@@ -25,7 +24,7 @@ export default function PrintViewPage() {
   const backRef = useRef(null);
 
   useEffect(() => {
-    axios.get(`${API}/computers/${encodeURIComponent(decodedSerial)}`)
+    axios.get(`${API_BASE}/computers/${encodeURIComponent(decodedSerial)}`)
       .then(res => setComputer(res.data))
       .catch(() => toast.error('Failed to load record'))
       .finally(() => setLoading(false));

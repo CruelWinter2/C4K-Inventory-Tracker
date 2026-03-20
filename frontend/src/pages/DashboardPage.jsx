@@ -5,8 +5,7 @@ import { toast } from 'sonner';
 import { Search, Plus, Edit2, Eye, Trash2, Download, RefreshCw, ChevronLeft, ChevronRight, Printer } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API_BASE } from '../utils/api';
 
 const STATUSES = ['Processing', 'In Stock', 'Donated', 'Sold', 'Pending Review', 'Pending Delivery'];
 const RECORDS_PER_PAGE = 25;
@@ -124,7 +123,7 @@ export default function DashboardPage() {
   const fetchComputers = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API}/computers`);
+      const res = await axios.get(`${API_BASE}/computers`);
       setComputers(res.data);
     } catch {
       toast.error('Failed to load inventory. Please refresh.');
@@ -166,7 +165,7 @@ export default function DashboardPage() {
 
   const handleStatusChange = async (serialNo, newStatus) => {
     try {
-      await axios.patch(`${API}/computers/${encodeURIComponent(serialNo)}/status`, { status: newStatus });
+      await axios.patch(`${API_BASE}/computers/${encodeURIComponent(serialNo)}/status`, { status: newStatus });
       setComputers(prev => prev.map(c => c.serial_no === serialNo ? { ...c, inventory_status: newStatus } : c));
       toast.success(`Status updated to "${newStatus}"`);
     } catch {
@@ -177,7 +176,7 @@ export default function DashboardPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await axios.delete(`${API}/computers/${encodeURIComponent(deleteTarget.serial_no)}`);
+      await axios.delete(`${API_BASE}/computers/${encodeURIComponent(deleteTarget.serial_no)}`);
       setComputers(prev => prev.filter(c => c.serial_no !== deleteTarget.serial_no));
       toast.success(`Record "${deleteTarget.serial_no}" deleted`);
     } catch {

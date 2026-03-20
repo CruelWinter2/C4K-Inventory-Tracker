@@ -179,6 +179,14 @@ class SetupInitRequest(BaseModel):
     confirm_password: str
 
 
+# ── health check ──────────────────────────────────────────────────────────────
+
+@api_router.get("/health")
+async def health():
+    """Lightweight health-check endpoint used by Docker and setup.sh."""
+    return {"status": "ok", "service": "c4k-inventory-backend"}
+
+
 # ── setup routes (no auth required) ──────────────────────────────────────────
 
 @api_router.get("/setup/status")

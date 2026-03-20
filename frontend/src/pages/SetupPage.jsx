@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Eye, EyeOff, CheckCircle } from 'lucide-react';
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API_BASE } from '../utils/api';
 
 function PasswordRule({ met, text }) {
   return (
@@ -27,7 +26,7 @@ export default function SetupPage() {
 
   // If setup is already done, redirect to login
   useEffect(() => {
-    axios.get(`${API}/setup/status`)
+    axios.get(`${API_BASE}/setup/status`)
       .then(res => {
         if (!res.data.setup_required) {
           navigate('/login', { replace: true });
@@ -58,7 +57,7 @@ export default function SetupPage() {
     }
     setLoading(true);
     try {
-      await axios.post(`${API}/setup/init`, {
+      await axios.post(`${API_BASE}/setup/init`, {
         username: username.trim(),
         password,
         confirm_password: confirm,

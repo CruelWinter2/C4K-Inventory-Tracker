@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API_BASE } from '../utils/api';
 
 const REQUIREMENTS = [
   'At least 8 characters',
@@ -59,7 +58,7 @@ export default function ForcePasswordModal({ isOpen, onSuccess }) {
     if (newPw !== confirmPw) { setError('Passwords do not match.'); return; }
     setSaving(true);
     try {
-      await axios.post(`${API}/auth/change-password`, { new_password: newPw, confirm_password: confirmPw });
+      await axios.post(`${API_BASE}/auth/change-password`, { new_password: newPw, confirm_password: confirmPw });
       toast.success('Password updated! Welcome to C4K Inventory.');
       onSuccess();
     } catch (err) {

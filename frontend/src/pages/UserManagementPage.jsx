@@ -5,8 +5,7 @@ import { Users, Plus, KeyRound, Trash2, ShieldCheck, Wrench, X } from 'lucide-re
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API_BASE } from '../utils/api';
 
 /* ── Accessible Modal Shell ────────────────────────────────────────────── */
 function Modal({ id, title, onClose, children }) {
@@ -79,7 +78,7 @@ function AddUserModal({ onClose, onCreated }) {
     if (password.length < 8) { setError('Password must be at least 8 characters.'); return; }
     setSaving(true);
     try {
-      const res = await axios.post(`${API}/admin/users`, { username: username.trim(), initial_password: password, role });
+      const res = await axios.post(`${API_BASE}/admin/users`, { username: username.trim(), initial_password: password, role });
       toast.success(`User "${res.data.username}" created. They must change password on first login.`);
       onCreated(res.data);
       onClose();
@@ -178,7 +177,7 @@ function ResetPasswordModal({ targetUser, onClose, onReset }) {
     if (newPw.length < 8) { setError('Password must be at least 8 characters.'); return; }
     setSaving(true);
     try {
-      await axios.put(`${API}/admin/users/${targetUser.username}/reset-password`, { new_password: newPw });
+      await axios.put(`${API_BASE}/admin/users/${targetUser.username}/reset-password`, { new_password: newPw });
       toast.success(`Password reset for "${targetUser.username}". They must change it on next login.`);
       onReset();
       onClose();
@@ -240,7 +239,7 @@ function DeleteUserDialog({ targetUser, onClose, onDeleted }) {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      await axios.delete(`${API}/admin/users/${targetUser.username}`);
+      await axios.delete(`${API_BASE}/admin/users/${targetUser.username}`);
       toast.success(`User "${targetUser.username}" deleted`);
       onDeleted(targetUser.username);
       onClose();
@@ -314,7 +313,7 @@ export default function UserManagementPage() {
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API}/admin/users`);
+      const res = await axios.get(`${API_BASE}/admin/users`);
       setUsers(res.data);
     } catch {
       toast.error('Failed to load users');

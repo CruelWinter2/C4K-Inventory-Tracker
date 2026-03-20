@@ -6,8 +6,7 @@ import { Save, ArrowLeft, Calendar } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
 import '../styles/form.css';
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API_BASE } from '../utils/api';
 
 const INITIAL_FORM = {
   serial_no: '', recipient_name: '', parent_name: '',
@@ -60,7 +59,7 @@ export default function IntakeFormPage() {
   // Load existing record when editing
   useEffect(() => {
     if (!isEdit) return;
-    axios.get(`${API}/computers/${encodeURIComponent(decodedSerial)}`)
+    axios.get(`${API_BASE}/computers/${encodeURIComponent(decodedSerial)}`)
       .then(res => {
         const { id, created_at, updated_at, created_by, updated_by, ...fields } = res.data;
         setFormData({ ...INITIAL_FORM, ...fields });
@@ -95,10 +94,10 @@ export default function IntakeFormPage() {
     setSaving(true);
     try {
       if (isEdit) {
-        await axios.put(`${API}/computers/${encodeURIComponent(decodedSerial)}`, formData);
+        await axios.put(`${API_BASE}/computers/${encodeURIComponent(decodedSerial)}`, formData);
         toast.success('Record updated successfully');
       } else {
-        await axios.post(`${API}/computers`, formData);
+        await axios.post(`${API_BASE}/computers`, formData);
         toast.success('Computer record saved successfully');
       }
       announce('Record saved. Returning to dashboard.');

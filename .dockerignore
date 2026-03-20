@@ -1,0 +1,46 @@
+# C4K Inventory System — Docker build context exclusions
+# These paths are excluded from the Docker build context (sent to Docker daemon).
+# They do NOT affect docker-compose env file loading.
+
+# Version control
+.git
+.gitignore
+.emergent
+
+# Dependencies (installed inside Docker)
+**/node_modules
+frontend/node_modules
+
+# Build output (rebuilt inside Docker)
+frontend/build
+
+# Python cache
+**/__pycache__
+**/*.pyc
+**/*.pyo
+
+# Test files and reports
+**/tests
+test_reports
+*.test.*
+
+# Documentation
+*.md
+README*
+design_guidelines.json
+
+# Secrets — injected via docker-compose environment, not baked into image
+.env
+.env.*
+frontend/.env
+frontend/.env.*
+backend/.env
+
+# Editor and OS files
+.DS_Store
+*.swp
+*.swo
+Thumbs.db
+
+# Logs
+*.log

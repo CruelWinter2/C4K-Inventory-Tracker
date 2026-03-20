@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../utils/api';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const t = localStorage.getItem('c4k_token');
     if (t) {
-      axios.get(`${API}/auth/me`)
+      axios.get(`${API_BASE}/auth/me`)
         .then(res => {
           setUser(res.data);
           setMustChangePassword(res.data.must_change_password);
@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (username, password) => {
-    const res = await axios.post(`${API}/auth/login`, { username, password });
+    const res = await axios.post(`${API_BASE}/auth/login`, { username, password });
     const { access_token, must_change_password, username: uname, role } = res.data;
     localStorage.setItem('c4k_token', access_token);
     setUser({ username: uname, must_change_password, role });
