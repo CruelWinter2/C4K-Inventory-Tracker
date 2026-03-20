@@ -1,11 +1,19 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, Download, LogOut, Star, Users } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { LayoutDashboard, PlusCircle, Download, LogOut, Users, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 
 export default function Sidebar({ onExport }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close sidebar whenever the route changes (user navigated)
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -16,19 +24,46 @@ export default function Sidebar({ onExport }) {
   const NAV_ITEMS = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
     { to: '/add', label: 'Add New Computer', icon: PlusCircle, end: false },
-    ...(user?.role === 'admin' ? [{ to: '/users', label: 'User Management', icon: Users, end: false }] : []),
+    ...(user?.role === 'admin' ? [{ to: '/users', label: 'User Management', icon: Users, end: false, testid: 'nav-user-management' }] : []),
   ];
 
   return (
-    <aside
-      className="h-screen w-64 bg-[#2e5496] text-white flex flex-col fixed left-0 top-0 z-50"
-      aria-label="Main navigation"
-    >
+    <>
+      {/* Mobile hamburger button — only visible on small screens */}
+      <button
+        className="fixed top-3 left-3 z-[60] md:hidden bg-[#2e5496] text-white p-2.5 rounded-lg shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]"
+        onClick={() => setMobileOpen(o => !o)}
+        aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
+        aria-expanded={mobileOpen}
+        aria-controls="main-sidebar"
+        data-testid="mobile-menu-btn"
+      >
+        {mobileOpen
+          ? <X className="w-5 h-5" aria-hidden="true" />
+          : <Menu className="w-5 h-5" aria-hidden="true" />}
+      </button>
+
+      {/* Mobile backdrop overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          aria-hidden="true"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      <aside
+        id="main-sidebar"
+        className={`h-screen w-64 bg-[#2e5496] text-white flex flex-col fixed left-0 top-0 z-50 transition-transform duration-300 ease-in-out ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+        aria-label="Main navigation"
+      >
       {/* Logo / Brand */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-white/15">
         <div className="relative">
-          <Star className="w-9 h-9 fill-[#FFD700] text-[#FFD700]" aria-hidden="true" />
-          <span className="absolute inset-0 flex items-center justify-center text-[9px] font-black text-white leading-none">
+          <svg viewBox="0 0 24 24" className="w-9 h-9 text-[#FFD700] fill-current" aria-hidden="true">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white leading-none">
             C4K
           </span>
         </div>
@@ -41,12 +76,12 @@ export default function Sidebar({ onExport }) {
       {/* Navigation */}
       <nav className="flex-1 py-4 overflow-y-auto" aria-label="Sidebar navigation">
         <ul role="list" className="space-y-1 px-3">
-          {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+          {NAV_ITEMS.map(({ to, label, icon: Icon, end, testid }) => (
             <li key={to}>
               <NavLink
                 to={to}
                 end={end}
-                data-testid={`nav-${label.toLowerCase().replace(/\s+/g, '-')}`}
+                data-testid={testid || `nav-${label.toLowerCase().replace(/\s+/g, '-')}`}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-150 w-full
                   ${isActive
@@ -54,7 +89,6 @@ export default function Sidebar({ onExport }) {
                     : 'text-white/80 hover:bg-white/10 hover:text-white'
                   }`
                 }
-                aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
                 <span>{label}</span>
@@ -98,5 +132,6 @@ export default function Sidebar({ onExport }) {
         </button>
       </div>
     </aside>
+    </>
   );
 }

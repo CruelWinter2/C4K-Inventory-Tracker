@@ -224,6 +224,11 @@ async def login(data: LoginRequest):
     user = await db.users.find_one({"username": data.username})
     if not user or not verify_password(data.password, user["hashed_password"]):
         raise HTTPException(status_code=401, detail="Invalid username or password")
+    # Record last login timestamp
+    await db.users.update_one(
+        {"_id": user["_id"]},
+        {"$set": {"last_login": datetime.now(timezone.utc).isoformat()}}
+    )
     token = create_token({"sub": str(user["_id"]), "username": user["username"]})
     return {
         "access_token": token,
@@ -333,6 +338,7 @@ def user_to_dict(user: dict) -> dict:
         "role": user.get("role", "technician"),
         "must_change_password": user.get("must_change_password", False),
         "created_at": user.get("created_at", ""),
+        "last_login": user.get("last_login"),
     }
 
 @api_router.get("/admin/users")

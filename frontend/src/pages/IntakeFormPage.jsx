@@ -116,7 +116,7 @@ export default function IntakeFormPage() {
     return (
       <div className="flex min-h-screen" style={{ fontFamily: 'Montserrat, sans-serif' }}>
         <Sidebar onExport={() => {}} />
-        <main className="ml-64 flex-1 flex items-center justify-center">
+        <main className="md:ml-64 flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <div className="w-10 h-10 border-4 border-[#2e5496] border-t-transparent rounded-full animate-spin" role="status" />
             <p className="text-[#2e5496] font-semibold">Loading record...</p>
@@ -130,7 +130,7 @@ export default function IntakeFormPage() {
     <div className="flex min-h-screen bg-gray-50" style={{ fontFamily: 'Montserrat, sans-serif' }}>
       <Sidebar onExport={() => {}} />
 
-      <main className="ml-64 flex-1 flex flex-col" id="main-content">
+      <main className="md:ml-64 flex-1 flex flex-col pt-14 md:pt-0" id="main-content">
         {/* aria-live region for screen reader announcements */}
         <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
           {announcement}

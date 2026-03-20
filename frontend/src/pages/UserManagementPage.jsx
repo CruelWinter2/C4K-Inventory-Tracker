@@ -334,7 +334,7 @@ export default function UserManagementPage() {
     <div className="flex min-h-screen bg-gray-50" style={{ fontFamily: 'Montserrat, sans-serif' }}>
       <Sidebar onExport={() => {}} />
 
-      <main className="ml-64 flex-1 flex flex-col" id="main-content">
+      <main className="md:ml-64 flex-1 flex flex-col pt-14 md:pt-0" id="main-content">
         {/* Page header */}
         <header className="bg-white border-b border-gray-200 px-8 py-5 flex items-center justify-between">
           <div>
@@ -366,6 +366,7 @@ export default function UserManagementPage() {
                     <th scope="col" className="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Username</th>
                     <th scope="col" className="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Role</th>
                     <th scope="col" className="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Password Status</th>
+                    <th scope="col" className="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Last Login</th>
                     <th scope="col" className="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Created</th>
                     <th scope="col" className="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Actions</th>
                   </tr>
@@ -373,13 +374,13 @@ export default function UserManagementPage() {
                 <tbody aria-live="polite" aria-busy={loading}>
                   {loading ? (
                     <tr>
-                      <td colSpan={5} className="text-center py-12 text-gray-400">
+                      <td colSpan={6} className="text-center py-12 text-gray-400">
                         <div className="w-7 h-7 border-4 border-[#2e5496] border-t-transparent rounded-full animate-spin mx-auto" role="status" />
                       </td>
                     </tr>
                   ) : users.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="text-center py-12 text-gray-400">No users found</td>
+                      <td colSpan={6} className="text-center py-12 text-gray-400">No users found</td>
                     </tr>
                   ) : users.map(u => (
                     <tr key={u.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors" data-testid={`user-row-${u.username}`}>
@@ -407,6 +408,11 @@ export default function UserManagementPage() {
                         ) : (
                           <span className="text-xs text-green-700 bg-green-50 border border-green-200 px-2.5 py-0.5 rounded-full font-semibold">Active</span>
                         )}
+                      </td>
+                      <td className="px-5 py-3.5 text-gray-500 text-xs" data-testid={`last-login-${u.username}`}>
+                        {u.last_login
+                          ? new Date(u.last_login).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+                          : <span className="text-gray-400 italic">Never</span>}
                       </td>
                       <td className="px-5 py-3.5 text-gray-500 text-xs">
                         {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}

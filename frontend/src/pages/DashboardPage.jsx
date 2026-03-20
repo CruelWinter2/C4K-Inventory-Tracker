@@ -248,7 +248,7 @@ export default function DashboardPage() {
     <div className="flex min-h-screen bg-gray-50" style={{ fontFamily: 'Montserrat, sans-serif' }}>
       <Sidebar onExport={handleExport} />
 
-      <main className="ml-64 flex-1 flex flex-col min-h-screen" id="main-content">
+      <main className="md:ml-64 flex-1 flex flex-col min-h-screen pt-14 md:pt-0" id="main-content">
         {/* Page header */}
         <header className="bg-white border-b border-gray-200 px-8 py-5 flex items-center justify-between">
           <div>

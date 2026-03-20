@@ -425,58 +425,121 @@
 /* ── Print styles ─────────────────────────────────────────────────────────── */
 
 @media print {
-  body > *:not(.c4k-print-root) {
+  /* Page setup */
+  @page {
+    margin: 0.4in 0.5in;
+    size: letter portrait;
+  }
+
+  /* Hide all non-essential UI — targeted, not body-level */
+  aside,
+  nav,
+  .no-print,
+  .action-buttons,
+  .audit-log,
+  .today-btn,
+  #emergent-badge {
     display: none !important;
   }
 
-  .c4k-print-root {
+  /* Remove sidebar offset — make everything full width */
+  body,
+  #root,
+  main,
+  .c4k-form-root {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Collapse the flex layout that creates the sidebar gap */
+  .flex.min-h-screen {
     display: block !important;
   }
 
-  .c4k-form-root .page-bottom-note {
-    page-break-after: always;
+  /* Page-break avoidance — keep sections together */
+  .c4k-form-root .recipient-info,
+  .c4k-form-root .softwares-info,
+  .c4k-form-root .computer-info,
+  .c4k-form-root .oig,
+  .c4k-form-root table,
+  .c4k-form-root tr,
+  .c4k-form-root .form-checkbox.align-start {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
+  /* Form padding in print */
   .c4k-form-root .page-header,
   .c4k-form-root .page-body {
     padding: 10px 25px;
-  }
-
-  .c4k-form-root .oig > .form-checkbox {
-    margin-bottom: 5px;
-  }
-
-  .c4k-form-root .signatures {
-    margin-top: 0;
-  }
-
-  .c4k-form-root .oig + .oig {
-    margin-top: 7px;
   }
 
   .c4k-form-root .ph-title {
     padding: 0 25px;
   }
 
-  .c4k-form-root .action-buttons {
-    display: none !important;
+  .c4k-form-root .oig + .oig {
+    margin-top: 7px;
   }
 
-  .c4k-form-root .audit-log {
-    display: none;
-  }
-
-  .no-print {
-    display: none !important;
+  .c4k-form-root .oig > .form-checkbox {
+    margin-bottom: 5px;
   }
 
   .c4k-form-root .computer-info {
     margin-bottom: 20px;
   }
 
-  /* Batch print page-break between records */
+  /* Page 1 → Page 2 natural break */
+  .c4k-form-root .page-bottom-note {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  /* Batch print record breaks */
   .c4k-batch-break {
     page-break-after: always;
     break-after: page;
+  }
+}
+
+/* ── Mobile responsive styles ────────────────────────────────────────────── */
+
+@media screen and (max-width: 767px) {
+  .c4k-form-root .page-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
+    gap: 10px;
+  }
+
+  .c4k-form-root .page-body {
+    padding: 12px;
+  }
+
+  .c4k-form-root .softwares-info {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .c4k-form-root .computer-info-body {
+    flex-direction: column;
+  }
+
+  .c4k-form-root .computer-info-body .col {
+    width: 100%;
+  }
+
+  .c4k-form-root .form-group {
+    flex-wrap: wrap;
+  }
+
+  .c4k-form-root .action-buttons {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
   }
 }
