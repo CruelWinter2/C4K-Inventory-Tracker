@@ -168,6 +168,14 @@ Full-stack Inventory Management System for **Computers 4 Kids (C4K)** nonprofit 
 - `aria-label` on all icon-only buttons
 - Screen reader accessible search and table
 
+### Local Docker Deployment Stack (2025-12)
+- **Centralized API Configuration** — Created `/app/frontend/src/utils/api.js` that exports `API_BASE`. All pages (LoginPage, SetupPage, DashboardPage, etc.) import from this utility instead of using inline `process.env.REACT_APP_BACKEND_URL`. Includes console error logging if env var is missing.
+- **Docker Build Validation** — `Dockerfile.frontend` now validates `REACT_APP_BACKEND_URL` is set before running `yarn build`. Fails fast with clear error message if missing.
+- **Docker Compose Required Vars** — `docker-compose.yml` uses `${REACT_APP_BACKEND_URL:?error message}` syntax to fail immediately if .env is not generated.
+- **setup.sh Script** — Interactive Bash script that: (1) Checks Docker prerequisites, (2) Prompts for domain/protocol/port, (3) Generates `.env` files for root/frontend/backend, (4) Generates `nginx.conf` with proper `/api/` routing, (5) Builds and starts all containers, (6) Waits for health checks, (7) Prints success message with first-login instructions.
+- **nginx.conf Template** — Properly routes `/api/*` to backend:8001, serves React SPA with `try_files` fallback for client-side routing, includes `/nginx-health` endpoint for container health checks.
+- **Files Created**: `/app/setup.sh`, `/app/docker-compose.yml`, `/app/Dockerfile.frontend`, `/app/Dockerfile.backend`, `/app/.dockerignore`, `/app/.env.example`
+
 ---
 
 ## API Endpoints
@@ -208,6 +216,7 @@ Processing, In Stock, Donated, Sold, Pending Review, Pending Delivery
 - [x] Full intake form (exact original HTML)
 - [x] Print view with QR code
 - [x] CSV export
+- [x] Local Docker Deployment Stack (setup.sh, docker-compose, nginx routing)
 
 ### P1 (High Priority - done)
 - [x] Multi-user account management (add/remove users from admin panel)
@@ -215,15 +224,16 @@ Processing, In Stock, Donated, Sold, Pending Review, Pending Delivery
 - [x] Date-range filtering on Dashboard
 - [x] Dashboard Quick Stats Bar (aria-live)
 - [x] Print function hardening
-- [ ] Search by additional fields (Manufacturer, Date Imaged)
+- [x] Centralized API configuration (no 'undefined' URL errors)
 - [ ] Backend password strength validation (currently only frontend)
 
 ### P2 (Nice to Have)
-- [ ] Bulk status update
+- [ ] Bulk status update for multiple selected records
 - [ ] Inventory statistics/reporting charts
 - [ ] Email notifications on donation completion
 - [ ] Barcode scanner input for Serial No. field
 - [ ] Dark mode
+- [ ] Optional cover sheet for batch print jobs
 
 ---
 
