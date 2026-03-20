@@ -1,47 +1,23 @@
-# ── Stage 1: Build React app ──────────────────────────────────────────────────
-FROM node:20-alpine AS builder
-
+FROM node:20-alpine as builder
 WORKDIR /app
 
-# Copy dependency manifests first for layer caching
-COPY frontend/package.json frontend/yarn.lock ./
-RUN yarn install --frozen-lockfile --non-interactive
+# Copy only the package definition
+COPY frontend/package.json ./
 
-# Inject backend URL at build time so React embeds it into the JS bundle
+# Force-install ajv and ajv-keywords to fix the missing module error
+RUN npm install --legacy-peer-deps && npm install ajv ajv-keywords --legacy-peer-deps
+
+# Copy the rest of the frontend source
+COPY frontend/ ./
+
+# Inject the Backend URL for the React build
 ARG REACT_APP_BACKEND_URL
 ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
 
-# Validate that REACT_APP_BACKEND_URL is set (fail fast with clear error)
-RUN if [ -z "$REACT_APP_BACKEND_URL" ]; then \
-      echo ""; \
-      echo "======================================================================="; \
-      echo "ERROR: REACT_APP_BACKEND_URL is not set!"; \
-      echo ""; \
-      echo "The frontend build requires this URL to be baked into the JavaScript."; \
-      echo "Please run 'bash setup.sh' first to generate the .env file."; \
-      echo "======================================================================="; \
-      echo ""; \
-      exit 1; \
-    fi && \
-    echo "Building frontend with REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL"
+RUN npm run build
 
-# Copy the full frontend source and build
-COPY frontend/ ./
-RUN yarn build
-
-# ── Stage 2: Serve with Nginx ─────────────────────────────────────────────────
 FROM nginx:1.25-alpine
-
-# Copy the React build output
 COPY --from=builder /app/build /usr/share/nginx/html
-
-# nginx.conf is mounted at runtime by docker-compose (see docker-compose.yml).
-# Remove the default config so our mounted one takes over.
-RUN rm /etc/nginx/conf.d/default.conf
-
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-
-HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost/nginx-health || exit 1
-
 CMD ["nginx", "-g", "daemon off;"]
